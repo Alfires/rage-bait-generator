@@ -1,0 +1,2733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ff69b4">
+    <title>Rage-Bait Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fff0f5 0%, #ffb6c1 30%, #ffc0cb 60%, #fff0f5 100%);
+            min-height: 100vh;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            padding: 20px env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .cursor-glow {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255, 182, 193, 0.6) 0%, rgba(255, 192, 203, 0.3) 40%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+        }
+
+        .floating-cat {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.4;
+            font-size: 2.5rem;
+            animation: catFloat 3s ease-in-out infinite;
+        }
+
+        .floating-cat:nth-child(1) { top: 5%; left: 3%; animation-duration: 2.5s; animation-delay: 0s; }
+        .floating-cat:nth-child(2) { top: 15%; right: 5%; animation-duration: 3.5s; animation-delay: 0.5s; }
+        .floating-cat:nth-child(3) { top: 35%; left: 2%; animation-duration: 2.8s; animation-delay: 1s; }
+        .floating-cat:nth-child(4) { top: 55%; right: 3%; animation-duration: 3.2s; animation-delay: 1.5s; }
+        .floating-cat:nth-child(5) { top: 75%; left: 4%; animation-duration: 2.6s; animation-delay: 2s; }
+        .floating-cat:nth-child(6) { top: 85%; right: 4%; animation-duration: 3s; animation-delay: 0.3s; }
+        .floating-cat:nth-child(7) { top: 25%; left: 92%; animation-duration: 2.7s; animation-delay: 0.7s; }
+        .floating-cat:nth-child(8) { top: 65%; left: 95%; animation-duration: 3.3s; animation-delay: 1.2s; }
+
+        @keyframes catFloat {
+            0%, 100% { transform: translateY(0) rotate(-5deg) scale(1); }
+            25% { transform: translateY(-15px) rotate(5deg) scale(1.05); }
+            50% { transform: translateY(-25px) rotate(-3deg) scale(1.1); }
+            75% { transform: translateY(-10px) rotate(3deg) scale(1.03); }
+        }
+
+        .main-wrapper {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .content-area {
+            flex: 1;
+        }
+
+        .pet-area {
+            width: 220px;
+            flex-shrink: 0;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+            color: #d63384;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 30px;
+            width: 100%;
+            border: 3px solid #ffb6c1;
+            box-shadow: 0 15px 50px rgba(255, 105, 180, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .language-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ffb6c1;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+            touch-action: manipulation;
+        }
+
+        .toggle-switch.active {
+            background: #ff69b4;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(30px);
+        }
+
+        .lang-label {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        .lang-label.active {
+            color: #d63384;
+            font-weight: bold;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #d63384;
+        }
+
+        .categories {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .category-btn {
+            padding: 18px 12px;
+            border: 2px solid #ffb6c1;
+            background: linear-gradient(145deg, #fff 0%, #fff0f5 100%);
+            color: #333;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            text-align: center;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .category-btn:hover {
+            border-color: #ff69b4;
+            background: linear-gradient(145deg, #fff 0%, #ffe4ec 100%);
+            transform: translateY(-3px);
+        }
+
+        .category-btn.selected {
+            border-color: #ff69b4;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: #fff;
+            font-weight: bold;
+            box-shadow: 0 5px 20px rgba(255, 105, 180, 0.4);
+        }
+
+        .category-btn .cat-icon {
+            display: block;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .generate-section {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #ffb6c1;
+            background: #fff;
+            color: #333;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: bold;
+            touch-action: manipulation;
+        }
+
+        .mode-btn:hover {
+            border-color: #ff69b4;
+            background: #fff5f8;
+        }
+
+        .mode-btn.active {
+            border-color: #ff69b4;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: #fff;
+        }
+
+        #datingModeBtn.active {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+            border-color: #9c27b0;
+        }
+
+        .generate-btn {
+            padding: 18px 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            touch-action: manipulation;
+            box-shadow: 0 5px 20px rgba(255, 20, 147, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(255, 20, 147, 0.5);
+        }
+
+        .generate-btn:active {
+            transform: scale(0.96);
+        }
+
+        .output-container {
+            margin-top: 25px;
+            min-height: 120px;
+        }
+
+        .output-text {
+            font-size: 1.3rem;
+            text-align: center;
+            line-height: 1.6;
+            padding: 25px;
+            background: linear-gradient(145deg, #fff 0%, #fff5f8 100%);
+            border-radius: 20px;
+            border: 2px dashed #ffb6c1;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.4s ease;
+            color: #333;
+        }
+
+        .output-text.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .output-text .category-label {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .pet-panel {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 20px;
+            border: 3px solid #ffb6c1;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.15);
+            position: sticky;
+            top: 20px;
+        }
+
+        .pet-title {
+            text-align: center;
+            font-size: 1rem;
+            color: #d63384;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .pet-display {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .pet-cat {
+            font-size: 4rem;
+            display: block;
+            animation: petBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes petBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .pet-name {
+            font-size: 1rem;
+            color: #d63384;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .pet-level {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .pet-streak {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .pet-hunger {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .pet-hunger-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff69b4, #ff1493);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .pet-input-group {
+            margin-bottom: 10px;
+        }
+
+        .pet-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #ffb6c1;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.3s;
+            color: #2d2d2d;
+            background-color: #fafafa;
+        }
+
+        .pet-input:focus {
+            border-color: #ff69b4;
+            background-color: #fff;
+        }
+
+        .pet-input::placeholder {
+            color: #999;
+        }
+
+        select.pet-input {
+            cursor: pointer;
+        }
+
+        .pet-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 8px;
+        }
+
+        .feed-btn {
+            background: linear-gradient(135deg, #ff69b4, #ff1493);
+            color: #fff;
+        }
+
+        .feed-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 20, 147, 0.4);
+        }
+
+        .name-btn {
+            background: linear-gradient(135deg, #ffb6c1, #ff69b4);
+            color: #fff;
+        }
+
+        .name-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .pet-message {
+            background: #fff5f8;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 0.8rem;
+            color: #d63384;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 50px;
+            border: 1px dashed #ffb6c1;
+        }
+
+        .stats-section {
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid #ffb6c1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .stats-title {
+            text-align: center;
+            color: #d63384;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+
+        .disclaimer {
+            margin-top: 25px;
+            text-align: center;
+            color: #aaa;
+            font-size: 0.8rem;
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+        }
+
+        .footer {
+            width: 100%;
+            max-width: 1100px;
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            border: 3px solid #ffb6c1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+
+        .footer-section h3 {
+            color: #d63384;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+
+        .footer-section p {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .footer-section p strong {
+            color: #d63384;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 15px;
+            border-top: 2px dashed #ffb6c1;
+        }
+
+        .footer-bottom p {
+            color: #d63384;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        @media (max-width: 900px) {
+            .main-wrapper {
+                flex-direction: column;
+            }
+
+            .pet-area {
+                width: 100%;
+                order: 2;
+            }
+
+            .content-area {
+                order: 1;
+            }
+
+            .pet-panel {
+                position: static;
+            }
+
+            .categories {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .container {
+                padding: 18px;
+            }
+
+            .categories {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .category-btn {
+                padding: 14px 10px;
+            }
+
+            .category-btn .cat-icon {
+                font-size: 1.5rem;
+            }
+
+            .category-btn .cat-label {
+                font-size: 0.75rem;
+            }
+
+            .generate-btn {
+                width: 100%;
+                padding: 16px 30px;
+                font-size: 1rem;
+            }
+
+            .output-text {
+                font-size: 1.1rem;
+                padding: 18px;
+            }
+
+            .pet-cat {
+                font-size: 3rem;
+            }
+
+            .floating-cat {
+                font-size: 1.8rem;
+            }
+
+            .footer {
+                padding: 20px;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer-section h3 {
+                font-size: 0.95rem;
+            }
+
+            .footer-section p {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .categories {
+                gap: 8px;
+            }
+
+            .category-btn {
+                padding: 12px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <div class="floating-cat">😺</div>
+    <div class="floating-cat">😸</div>
+    <div class="floating-cat">😻</div>
+    <div class="floating-cat">🙀</div>
+    <div class="floating-cat">😽</div>
+    <div class="floating-cat">😹</div>
+    <div class="floating-cat">😾</div>
+    <div class="floating-cat">🐾</div>
+
+    <header>
+        <h1 id="title">Rage-Bait Generator</h1>
+        <p class="subtitle" id="subtitle">Generate controversial opinions to trigger debates</p>
+    </header>
+
+    <div class="main-wrapper">
+        <div class="content-area">
+            <div class="container">
+                <div class="language-toggle">
+                    <span class="lang-label active" id="lang-en">EN</span>
+                    <div class="toggle-switch" id="langToggle" onclick="toggleLanguage()"></div>
+                    <span class="lang-label" id="lang-de">DE</span>
+                </div>
+
+                <p class="section-title" id="category-title">Choose a category:</p>
+                <div class="categories" id="categories">
+                    <button class="category-btn selected" data-category="parents">
+                        <span class="cat-icon">👨‍👩‍👧</span>
+                        <span class="cat-label" data-en="Parents" data-de="Eltern">Parents</span>
+                    </button>
+                    <button class="category-btn" data-category="siblings">
+                        <span class="cat-icon">👫</span>
+                        <span class="cat-label" data-en="Brother & Sister" data-de="Bruder & Schwester">Brother & Sister</span>
+                    </button>
+                    <button class="category-btn" data-category="anime">
+                        <span class="cat-icon">🎌</span>
+                        <span class="cat-label" data-en="Anime" data-de="Anime">Anime</span>
+                    </button>
+                    <button class="category-btn" data-category="nerd">
+                        <span class="cat-icon">🤓</span>
+                        <span class="cat-label" data-en="Nerd" data-de="Nerd">Nerd</span>
+                    </button>
+                    <button class="category-btn" data-category="friends">
+                        <span class="cat-icon">🤝</span>
+                        <span class="cat-label" data-en="Friends" data-de="Freunde">Friends</span>
+                    </button>
+                    <button class="category-btn" data-category="series">
+                        <span class="cat-icon">📺</span>
+                        <span class="cat-label" data-en="Famous Series" data-de="Bekannte Serien">Famous Series</span>
+                    </button>
+                    <button class="category-btn" data-category="pets">
+                        <span class="cat-icon">🐾</span>
+                        <span class="cat-label" data-en="Pets" data-de="Haustiere">Pets</span>
+                    </button>
+                    <button class="category-btn" data-category="work">
+                        <span class="cat-icon">💼</span>
+                        <span class="cat-label" data-en="Work" data-de="Arbeit">Work</span>
+                    </button>
+                    <button class="category-btn" data-category="socialmedia">
+                        <span class="cat-icon">📱</span>
+                        <span class="cat-label" data-en="Social Media" data-de="Soziale Medien">Social Media</span>
+                    </button>
+                    <button class="category-btn" data-category="food">
+                        <span class="cat-icon">🍕</span>
+                        <span class="cat-label" data-en="Food" data-de="Essen">Food</span>
+                    </button>
+                    <button class="category-btn" data-category="neighbors">
+                        <span class="cat-icon">🏘️</span>
+                        <span class="cat-label" data-en="Neighbors" data-de="Nachbarn">Neighbors</span>
+                    </button>
+                    <button class="category-btn" data-category="gaming">
+                        <span class="cat-icon">🎮</span>
+                        <span class="cat-label" data-en="Gaming" data-de="Gaming">Gaming</span>
+                    </button>
+                </div>
+
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="rageModeBtn" onclick="setMode('rage')">😈 Rage Bait</button>
+                    <button class="mode-btn" id="datingModeBtn" onclick="setMode('dating')">💔 Dating Tips</button>
+                    <button class="mode-btn" id="fightModeBtn" onclick="setMode('fight')">🥊 Fight Tips</button>
+                </div>
+
+                <div class="generate-section">
+                    <button class="generate-btn" id="generateBtn" onclick="generateSentence()">Generate</button>
+                </div>
+
+                <div class="output-container">
+                    <div class="output-text" id="outputText"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pet-area">
+            <div class="pet-panel">
+                <div class="pet-title">🐱 Your Rage Cat 🐱</div>
+                <div class="pet-display">
+                    <span class="pet-cat" id="petEmoji">😺</span>
+                    <div class="pet-name" id="petNameDisplay">No Name</div>
+                    <div class="pet-level" id="petLevel">Level 1 Kitten</div>
+                    <div class="pet-streak" id="petStreak">🔥 Streak: 0 days</div>
+                    <div class="pet-hunger">
+                        <div class="pet-hunger-bar" id="petHungerBar" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div class="pet-input-group">
+                    <input type="text" class="pet-input" id="petNameInput" placeholder="Enter cat name...">
+                    <button class="pet-btn name-btn" onclick="setPetName()">Set Name</button>
+                </div>
+
+                <div class="pet-input-group">
+                    <select class="pet-input" id="petCategorySelect">
+                        <option value="parents">👨‍👩‍👧 Parents</option>
+                        <option value="siblings">👫 Brother & Sister</option>
+                        <option value="anime">🎌 Anime</option>
+                        <option value="nerd">🤓 Nerd</option>
+                        <option value="friends">🤝 Friends</option>
+                        <option value="series">📺 Famous Series</option>
+                        <option value="pets">🐾 Pets</option>
+                        <option value="work">💼 Work</option>
+                        <option value="socialmedia">📱 Social Media</option>
+                        <option value="food">🍕 Food</option>
+                        <option value="neighbors">🏘️ Neighbors</option>
+                        <option value="gaming">🎮 Gaming</option>
+                    </select>
+                </div>
+
+                <button class="pet-btn feed-btn" onclick="feedPet()">🍖 Feed & Hear Rage</button>
+
+                <div class="pet-message" id="petMessage">Feed me and I'll say something controversial! 🐱</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="stats-title">📊 Feeding Statistics</div>
+        <div class="chart-container">
+            <canvas id="feedingChart"></canvas>
+        </div>
+    </div>
+
+    <p class="disclaimer" id="disclaimer">All statements are satirical and meant for entertainment purposes only. Don't take them seriously!</p>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3 id="footer-copyright">© 2026 Rage-Bait Generator</h3>
+                <p id="footer-rights">All rights reserved.</p>
+            </div>
+            <div class="footer-section">
+                <h3 id="footer-creators">Creators</h3>
+                <p><strong>Alfire</strong> - <span id="footer-role1">Programmer</span></p>
+                <p><strong>Novalogo</strong> - <span id="footer-role2">Designer</span></p>
+            </div>
+            <div class="footer-section">
+                <h3 id="footer-legal">Legal Notice</h3>
+                <p id="footer-legal-text">This website is for entertainment purposes only. All generated content is satirical and should not be taken as factual statements or personal opinions of the creators.</p>
+            </div>
+            <div class="footer-section">
+                <h3 id="footer-disclaimer-title">Disclaimer</h3>
+                <p id="footer-disclaimer-text">The creators are not responsible for any arguments, debates, or hurt feelings resulting from the use of generated content. Use at your own risk!</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p id="footer-made">Made with ❤️ by Alfire & Novalogo</p>
+        </div>
+    </footer>
+
+    <script>
+        let currentLang = 'en';
+        let selectedCategory = 'parents';
+        let chart = null;
+
+        const petData = {
+            name: 'No Name',
+            level: 1,
+            streak: 0,
+            lastFed: null,
+            hunger: 100,
+            totalFeeds: 0,
+            dailyFeeds: {}
+        };
+
+        const petLevels = [
+            { level: 1, name: 'Kitten', emoji: '😺', required: 0 },
+            { level: 2, name: 'Playful Cat', emoji: '😸', required: 5 },
+            { level: 3, name: 'Fluffy Cat', emoji: '😻', required: 15 },
+            { level: 4, name: ' wise Cat', emoji: '🙀', required: 30 },
+            { level: 5, name: 'Rage Master', emoji: '😾', required: 50 },
+            { level: 6, name: 'Legendary Cat', emoji: '👹', required: 100 }
+        ];
+
+        const data = {
+            parents: {
+                en: [
+                    "Parents who check their kids' phones are just projecting their own trust issues.",
+                    "Helicopter parenting is just anxiety with a fancy name.",
+                    "Parents who live vicariously through their children's achievements are the worst kind of narcissists.",
+                    "Saying 'because I said so' is admitting you're too lazy to be a decent parent.",
+                    "Parents who don't let their kids fail are creating fragile adults who'll collapse at the first sign of struggle.",
+                    "Your child's achievements are NOT your achievements. Stop stealing their thunder.",
+                    "Parents who compare their kids to others are planting seeds of lifelong therapy sessions.",
+                    "Overprotective parents produce the most rebellious teenagers who'll go absolutely feral at college.",
+                    "Parents who sacrifice everything for their kids often create adults who can't even make toast.",
+                    "The 'I walked uphill both ways' parents are just trauma bonding with their trauma.",
+                    "Parents who say 'we didn't have therapy back then' are the reason everyone needs therapy now.",
+                    "The parents who brag about their kids' grades are really just compensating for their own failures.",
+                    "Parents who treat their kids like trophies are raising humans with abandonment issues.",
+                    "Boomer parents destroyed the economy and now blame millennials for not owning homes.",
+                    "Parents who say 'I turned out fine' clearly didn't turn out fine at all.",
+                    "Parents who post every moment of their kids' lives on social media are building a digital prison for their children.",
+                    "Parents who blame video games for their kids' behavior are just avoiding the mirror.",
+                    "Parents who force their kids into sports they hate are living out their own failed athletic dreams.",
+                    "Parents who say 'money doesn't buy happiness' are usually the ones who never learned to budget.",
+                    "Parents who still cut their 12-year-olds' food are raising adults who can't use a knife.",
+                    "Parents who brag about their kids' Ivy League acceptances are really just bragging about their own parenting brand.",
+                    "Parents who use 'because I love you' as a guilt trip weapon are emotional terrorists.",
+                    "Parents who refuse to apologize to their kids are teaching them that pride matters more than respect.",
+                    "Parents who let their kids run wild in restaurants are the reason people hate children.",
+                    "Parents who say 'wait until you have kids' are justifying their own misery.",
+                    "Parents who live through their kids' social media followers are the new stage parents."
+                ],
+                de: [
+                    "Eltern, die die Handys ihrer Kinder überprüfen, projizieren nur ihre eigenen Vertrauensprobleme.",
+                    "Helikopter-Eltern ist nur Angst mit einem schicken Namen.",
+                    "Eltern, die durch die Erfolge ihrer Kinder leben, sind die schlimmsten Narzissten.",
+                    "'Weil ich es sage' zu sagen bedeutet, dass du zu faul bist, ein anständiger Elternteil zu sein.",
+                    "Eltern, die ihre Kinder nicht scheitern lassen, erschaffen zerbrechliche Erwachsene.",
+                    "Die Erfolge deines Kindes sind NICHT deine Erfolge. Hör auf, ihnen den Ruhm zu stehlen.",
+                    "Eltern, die ihre Kinder mit anderen vergleichen, pflanzen Samen für lebenslange Therapiesitzungen.",
+                    "Überprotective Eltern produzieren die rebellischsten Teenager.",
+                    "Eltern, die alles für ihre Kinder opfern, erschaffen oft Erwachsene, die nicht mal Toast machen können.",
+                    "Die 'Ich bin bergauf in beide Gelaufen'-Eltern machen nur Trauma-Binding mit ihrem Trauma.",
+                    "Eltern, die sagen 'wir hatten damals keine Therapie', sind der Grund, warum jetzt jeder Therapie braucht.",
+                    "Die Eltern, die mit den Noten ihrer Kinder prahlen, kompensieren eigentlich ihr eigenes Versagen.",
+                    "Eltern, die ihre Kinder wie Trophäen behandeln, erziehen Menschen mit Bindungsängsten.",
+                    "Boomer-Eltern haben die Wirtschaft zerstört und schuldigen jetzt die Millennials.",
+                    "Eltern, die sagen 'mir geht es doch gut', sind ganz offensichtlich überhaupt nicht gut.",
+                    "Eltern, die jeden Moment ihrer Kinder in den sozialen Medien posten, bauen ein digitales Gefängnis.",
+                    "Eltern, die Videospiele für das Verhalten ihrer Kinder verantwortlich machen, vermeiden den Spiegel.",
+                    "Eltern, die ihre Kinder zu Sportarten zwingen, die sie hassen, leben ihre eigenen gescheiterten Träume aus.",
+                    "Eltern, die sagen 'Geld kauf kein Glück', haben meistens nie gelernt zu haushalten.",
+                    "Eltern, die ihren 12-Jährigen noch das Essen schneiden, erziehen Erwachsene, die kein Messer benutzen können.",
+                    "Eltern, die mit Ivy-League-Aufnahmen ihrer Kinder prahlen, verkaufen eigentlich ihre eigene Eltern-Marke.",
+                    "Eltern, die 'weil ich dich liebe' als Schuldgefühlen-Waffe nutzen, sind emotionale Terroristen.",
+                    "Eltern, die sich weigern, sich bei ihren Kindern zu entschuldigen, lehren sie, dass Stolz wichtiger als Respekt ist.",
+                    "Eltern, die ihre Kinder in Restaurants wild herumlaufen lassen, sind der Grund, warum Leute Kinder hassen.",
+                    "Eltern, die sagen 'warte, bis du Kinder hast', rechtfertigen ihr eigenes Elend.",
+                    "Eltern, die durch die Social-Media-Follower ihrer Kinder leben, sind die neuen Bühneneltern."
+                ]
+            },
+            siblings: {
+                en: [
+                    "Older siblings are just unpaid babysitters with superiority complexes.",
+                    "Younger siblings get away with murder because parents are too exhausted to care.",
+                    "The middle child syndrome is just an excuse for being chronically attention-seeking.",
+                    "Sibling rivalry is just parents playing favorites while pretending they don't.",
+                    "Your brother or sister is NOT your personal therapist or emotional punching bag.",
+                    "Being related doesn't mean you owe them anything. Some siblings are just toxic people you happened to be born near.",
+                    "The 'my house, my rules' sibling dynamic is just domestic terrorism with a family reunion twist.",
+                    "Older siblings who gatekeep hobbies are just terrified someone will do it better.",
+                    "Younger siblings who copy everything have zero originality and it shows.",
+                    "Parents who force you to include your siblings in everything are breeding resentment for Thanksgiving dinners.",
+                    "The sibling who 'got everything' according to you is probably miserable too.",
+                    "Your childhood best friend being your sibling doesn't mean they're not toxic.",
+                    "Older siblings think they're parent number two. Nobody asked for that.",
+                    "The 'we used to be so close' siblings are just mourning a relationship that never really existed.",
+                    "Siblings who borrow your stuff and never return it are just thieves with the same last name.",
+                    "The sibling who 'always started it' is just gaslighting you with a family bond.",
+                    "Older siblings who act like they raised you are rewriting history for clout.",
+                    "Younger siblings who tattle to parents are just building a case for future resentment.",
+                    "The 'blood is thicker than water' argument is just emotional blackmail in family form.",
+                    "Siblings who constantly compete with you are just insecure about their own identity.",
+                    "The sibling who always gets the bigger room clearly won the parent lottery.",
+                    "Parents who say 'work it out yourselves' are just outsourcing their parenting duties.",
+                    "Siblings who bring up old grudges at family dinners are professional grudge-holders.",
+                    "The 'we're family so you have to forgive me' card is the ultimate manipulation play.",
+                    "Your sibling's success doesn't diminish yours, but they'll act like it does anyway.",
+                    "The sibling who always sides with the parents is just playing the long game for inheritance."
+                ],
+                de: [
+                    "Ältere Geschwister sind nur unbezahlte Babysitter mit Überlegenheitskomplexen.",
+                    "Jüngere Geschwister kommen mit Mord durch, weil die Eltern zu erschöpft sind.",
+                    "Das Mittelkind-Syndrom ist nur eine Ausrede für chronische Aufmerksamkeitssuche.",
+                    "Geschwisterrivalität sind nur Eltern, die Favoriten spielen.",
+                    "Dein Bruder oder deine Schwester ist NICHT dein persönlicher Therapeut.",
+                    "Verwandt zu sein bedeutet nicht, dass du ihnen etwas schuldest.",
+                    "Die 'mein Haus, meine Regeln'-Geschwister-Dynamik ist nur Mobbing mit Familien-Branding.",
+                    "Ältere Geschwister, die Hobbys kontrollieren, haben nur Angst, dass jemand es besser macht.",
+                    "Jüngere Geschwister, die alles nachmachen, haben null Originalität.",
+                    "Eltern, die dich zwingen, deine Geschwister überall einzubeziehen, schaffen Groll.",
+                    "Das Geschwister, das 'alles bekommen hat', ist wahrscheinlich auch elend.",
+                    "Dein bester Kindheitsfreund dein Geschwister zu sein bedeutet nicht, dass es nicht toxisch ist.",
+                    "Ältere Geschwister denken, sie sind Elternteil Nummer zwei.",
+                    "Die 'wir waren mal so eng'-Geschwister trauern nur einer Phantom-Beziehung.",
+                    "Geschwister, die deine Sachen ausleihen und nie zurückgeben, sind Diebe mit gleichem Nachnamen.",
+                    "Das Geschwister, das 'hat immer angefangen', manipuliert dich mit Familienbanden.",
+                    "Ältere Geschwister, die so tun, als hätten sie dich großgezogen, schreiben Geschichte für Aufmerksamkeit.",
+                    "Jüngere Geschwister, die bei den Eltern petzen, bauen nur Fälle für zukünftigen Groll auf.",
+                    "Das 'Blut ist dicker als Wasser'-Argument ist nur emotionale Erpressung in Familienform.",
+                    "Geschwister, die ständig mit dir konkurrieren, sind nur unsicher über ihre eigene Identität.",
+                    "Das Geschwister, das immer das größere Zimmer bekommt, hat die Eltern-Lotterie gewonnen.",
+                    "Eltern, die sagen 'regelt das unter euch', outsourcen nur ihre Elternpflichten.",
+                    "Geschwister, die bei Familienessen alte Grudge hervorkramen, sind professionelle Groll-Holder.",
+                    "Die 'wir sind Familie, also musst du mich verzeihen'-Karte ist das ultimative Manipulationsspiel.",
+                    "Der Erfolg deines Geschwisters mindert deinen nicht, aber sie werden so tun, als würde er das.",
+                    "Das Geschwister, das immer auf der Seite der Eltern ist, spielt nur das lange Spiel für das Erbe."
+                ]
+            },
+            anime: {
+                en: [
+                    "Anime is just Japanese cartoons for adults who refuse to emotionally mature.",
+                    "Sub vs dub people are the most insufferable gatekeepers in human history.",
+                    "Most anime protagonists are just bland self-insert fantasies for lonely people.",
+                    "Anime fans who say 'you don't understand the culture' are defending mediocre storytelling.",
+                    "Filler episodes are the reason most anime should be half the length.",
+                    "Anime openings are overrated, and the skip button exists for a reason.",
+                    "The 'it gets good after 50 episodes' argument is Stockholm syndrome for TV.",
+                    "Anime fan service is just lazy pandering to desperate demographics.",
+                    "Calling anime 'art' while dismissing Western animation is pure delusion.",
+                    "The anime community's obsession with fictional characters over real people is genuinely alarming.",
+                    "The people who cry over anime deaths need to go outside and touch grass immediately.",
+                    "Anime conventions are just overpriced costume parties with body odor.",
+                    "Your anime body pillow doesn't count as a relationship. I'm sorry.",
+                    "Anime rankings are meaningless when half the voters are just simping for the main character.",
+                    "Watching anime subbed doesn't make you cultured, it makes you pretentious.",
+                    "Anime villains are just edgy teenagers with god complexes and bad hair.",
+                    "The ' anime is for kids' crowd has clearly never seen anything past Pokémon.",
+                    "Anime power scaling is the most inconsistent thing in fictional universes.",
+                    "People who rank anime girls are just lonely people with spreadsheets.",
+                    "The anime filler arc is the biggest crime against storytelling in television history.",
+                    "Anime fans who say 'the manga was better' are just gatekeeping from a different angle.",
+                    "Watching 500 anime doesn't make you a critic, it makes you someone with too much free time.",
+                    "Anime theme songs are catchy but that doesn't mean they're actually good music.",
+                    "The 'it's just anime' crowd uses that excuse to avoid any critical thinking about media.",
+                    "Anime characters who scream for 5 minutes to power up are the reason episodes are padded.",
+                    "The anime community's tier lists are just popularity contests disguised as analysis."
+                ],
+                de: [
+                    "Anime sind nur japanische Cartoons für Erwachsene, die nicht erwachsen werden wollen.",
+                    "Sub vs Dub Leute sind die unerträglichsten Gatekeeper der Menschheitsgeschichte.",
+                    "Die meisten Anime-Protagonisten sind langweilige Selbst-Insert-Fantasien.",
+                    "Anime-Fans, die sagen 'du verstehst die Kultur nicht', verteidigen Mittelmäßigkeit.",
+                    "Filler-Episoden sind der Grund, warum die meisten Anime halb so lang sein sollten.",
+                    "Anime-Openings sind überbewertet, und die Überspringen-Taste existiert nicht ohne Grund.",
+                    "Das 'es wird nach 50 Episoden gut'-Argument ist Stockholm-Syndrom für Fernsehen.",
+                    "Anime Fan Service ist nur faules Gesten gegenüber verzweifelten Zielgruppen.",
+                    "Anime 'Kunst' zu nennen und westliche Animation abzulehnen ist Wahnvorstellung.",
+                    "Die Besessenheit der Anime-Community mit fiktiven Charakteren ist beunruhigend.",
+                    "Die Leute, die über Anime-Todesfälle weinen, sollten Gras anfassen.",
+                    "Anime-Conventions sind nur überteuerte Kostümpartys mit Körpergeruch.",
+                    "Dein Anime-Körperkissen zählt nicht als Beziehung.",
+                    "Anime-Rankings sind sinnlos, wenn die Hälfte der Wähler simpt.",
+                    "Anime auf Japanisch zu schauen macht dich nicht kultiviert.",
+                    "Anime-Schurken sind nur edgy Teenager mit Gottkomplexen und schlechten Haaren.",
+                    "Die 'Anime ist für Kinder'-Leute haben offensichtlich nie etwas über Pokémon hinaus gesehen.",
+                    "Anime-Power-Scaling ist das Inkonsistenteste in fiktiven Universen.",
+                    "Leute, die Anime-Mädchen sortieren, sind nur einsame Leute mit Tabellenkalkulation.",
+                    "Der Anime-Filler-Bogen ist das größte Verbrechen gegen das Erzählen in der Fernsehgeschichte.",
+                    "Anime-Fans, die sagen 'der Manga war besser', gatekeepen nur von einem anderen Winkel.",
+                    "500 Anime zu schauen macht dich nicht zum Kritiker, es macht dich zu jemandem mit zu viel Freizeit.",
+                    "Anime-Theme-Songs sind einprägsam, aber das bedeutet nicht, dass sie gute Musik sind.",
+                    "Die 'es ist nur Anime'-Leute benutzen diese Ausrede, um kritisches Denken zu vermeiden.",
+                    "Anime-Charaktere, die 5 Minuten schreien um sich zu verstärken, sind der Grund für aufgeblähte Episoden.",
+                    "Die Tier-Listen der Anime-Community sind nur Beliebtheitswettbewerbe als Analyse verkleidet."
+                ]
+            },
+            nerd: {
+                en: [
+                    "Being a nerd is not a personality, it's a defense mechanism for social anxiety.",
+                    "Nerd culture has become the very thing it claimed to hate: gatekeeping bullies.",
+                    "Gatekeeping fandoms based on 'true fan' status is the most pathetic hill to die on.",
+                    "Your encyclopedic knowledge of fictional universes won't impress anyone at a job interview.",
+                    "Comic book movies are not 'cinema' - they're $200 million toy commercials.",
+                    "D&D players who act superior to video gamers are just trading one basement hobby for another.",
+                    "STEM superiority complexes are just insecurity wearing a lab coat.",
+                    "The 'I was a nerd before it was cool' crowd are just rewriting history to seem interesting.",
+                    "Being good at coding doesn't make you smarter than everyone else, it just makes you a better coder.",
+                    "Nerd culture's toxic masculinity is just insecurity cosplaying as confidence.",
+                    "Your Funko Pop collection is not a personality trait, it's a hoarding problem.",
+                    "The people who gatekeep gaming because 'women are invading' are the real gamers... of fragility.",
+                    "Board game enthusiasts who sneer at casual gamers are just elitists with cardboard addiction.",
+                    "Anime nerds who think they're smarter than everyone because they watch 'deep' shows are adorable.",
+                    "The 'well actually' crowd in any fandom is universally despised for a reason.",
+                    "People who correct your gaming terminology at parties are why nobody invites them back.",
+                    "The 'PC master race' crowd spends more time benchmarking than actually playing games.",
+                    "Tech bros who think they're revolutionary because they use Linux are just pretentious hobbyists.",
+                    "Your Star Wars hot take isn't controversial, it's just desperate for attention.",
+                    "People who gatekeep comic book knowledge at conventions are just insecure about their social skills.",
+                    "The 'I built my own PC' crowd acts like they invented fire.",
+                    "Board game elitists who refuse to play anything with dice are just afraid of randomness.",
+                    "Your cryptocurrency portfolio doesn't make you a financial genius, it makes you a gambler.",
+                    "People who think intelligence is measured by their STEM degree are emotionally stunted.",
+                    "The 'I read the book first' people use literacy as a weapon of superiority.",
+                    "Your memorized movie quotes don't make you funny, they make you a parrot with a DVD collection."
+                ],
+                de: [
+                    "Nerd zu sein ist keine Persönlichkeit, es ist ein Abwehrmechanismus gegen soziale Angst.",
+                    "Nerd-Kultur ist genau das geworden, was sie gehasst hat: gatekeepende Mobber.",
+                    "Fandoms basierend auf 'True Fan'-Status zu gatekeepen ist erbärmlich.",
+                    "Dein enzyklopädisches Wissen über fiktive Universen wird niemanden beeindrucken.",
+                    "Comic-Buch-Filme sind kein 'Kino' - sie sind 200-Millionen-Dollar-Toys-Werbung.",
+                    "D&D-Spieler, die sich Video-Gamern überlegen fühlen, tauschen nur Keller-Hobbys.",
+                    "STEM-Überlegenheitskomplexe sind nur Unsicherheit mit Laborkittel.",
+                    "Die 'Ich war ein Nerd, bevor es cool war'-Leute schreiben Geschichte um.",
+                    "Gut im Programmieren zu sein macht dich nicht intelligenter als alle anderen.",
+                    "Die toxische Männlichkeit der Nerd-Kultur ist Unsicherheit als Selbstvertrauen verkleidet.",
+                    "Deine Funko-Pop-Sammlung ist ein Hortungsproblem.",
+                    "Die Leute, die Gaming gatekeepen, weil 'Frauen einfallen', sind die echten Fragilen.",
+                    "Brettspiel-Enthusiasten, die auf Casuall-Gamer herabblicken, sind Elitäre mit Karton-Sucht.",
+                    "Anime-Nerds, die denken, sie seien intelligenter weil sie 'tiefe' Shows schauen, sind bezaubernd.",
+                    "Die 'nun eigentlich'-Leute werden aus gutem Grund universell gehasst.",
+                    "Leute, die deine Gaming-Terminologie bei Partys korrigieren, werden nie wieder eingeladen.",
+                    "Die 'PC Master Race'-Leute verbringen mehr Zeit mit Benchmarking als mit Spielen.",
+                    "Tech-Bros, die denken, sie seien revolutionär weil sie Linux benutzen, sind nur arrogante Hobbyisten.",
+                    "Dein Star Wars Hot Take ist nicht kontrovers, er verzweifelt nur nach Aufmerksamkeit.",
+                    "Leute, die Comic-Wissen bei Conventions gatekeepen, sind nur unsicher über ihre sozialen Fähigkeiten.",
+                    "Die 'ich habe meinen eigenen PC gebaut'-Leute tun so, als hätten sie das Feuer erfunden.",
+                    "Brettspiel-Elitäre, die sich weigern, irgendwas mit Würfeln zu spielen, haben einfach Angst vor Zufälligkeit.",
+                    "Dein Kryptowährungs-Portfolio macht dich nicht zum Finanzgenie, es macht dich zum Spieler.",
+                    "Leute, die denken, Intelligenz werde durch ihren STEM-Abschluss gemessen, sind emotional zurückgeblieben.",
+                    "Die 'ich habe das Buch zuerst gelesen'-Leute benutzen Lesen als Überlegenheitswaffe.",
+                    "Deine auswendig gelernten Filmzitate machen dich nicht lustig, sie machen dich zum Papagei mit DVD-Sammlung."
+                ]
+            },
+            friends: {
+                en: [
+                    "Most friendships are just transactional relationships you haven't cashed in on yet.",
+                    "Adult friendships require effort, and most people are too narcissistic to give it.",
+                    "The 'best friends forever' mentality is just desperation disguised as loyalty.",
+                    "Your friends don't actually care about your problems - they're just waiting for their turn to talk.",
+                    "Friend groups often become echo chambers of mediocrity that crush individual growth.",
+                    "'Quality over quantity' is what people with no friends tell themselves to sleep at night.",
+                    "The friend who always cancels plans is not a friend - they're a ghost with a phone number.",
+                    "True friendship doesn't require constant texting - that's just codependency with extra steps.",
+                    "Your childhood friends outgrew you, and pretending otherwise is just sad.",
+                    "The 'ride or die' mentality is just toxic loyalty that'll ruin your life eventually.",
+                    "The friend who only reaches out when they need something is just an opportunist.",
+                    "Group chats are just friendship tax - you pay attention or get kicked out.",
+                    "Your 'ride or die' friend would absolutely sell you out for the right price.",
+                    "The friend who posts about your birthday but doesn't call is just performing friendship.",
+                    "People who say they have 'no drama' friend groups are usually the drama.",
+                    "Your childhood friend group stayed together out of convenience, not compatibility.",
+                    "The friend who always plays the victim has perfected emotional manipulation.",
+                    "Adult friendships that require scheduled hangouts aren't real friendships.",
+                    "Your 'work friends' aren't real friends, they're just people stuck in the same building.",
+                    "The friend who gives unsolicited advice is just fishing for drama they can claim credit for solving.",
+                    "People who post 'my squad' photos are just advertising their social capital.",
+                    "The friend who cancels last minute every time is showing you exactly how much they value you.",
+                    "Your 'party friends' will disappear the moment the music stops.",
+                    "The friend who always has to one-up your stories is deeply insecure.",
+                    "People who say 'I don't have time for friends' are just telling you their priorities.",
+                    "The friend who ghosts you for months then acts like nothing happened is testing your boundaries."
+                ],
+                de: [
+                    "Die meisten Freundschaften sind nur transaktionale Beziehungen.",
+                    "Erwachsenen-Freundschaften erfordern Aufwand, und die meisten Leute sind zu narzisstisch.",
+                    "Die 'Best Friends Forever'-Mentalität ist nur Verzweiflung als Loyalität verkleidet.",
+                    "Deine Freunde kümmern sich nicht um deine Probleme - sie warten auf ihren Redefluss.",
+                    "Freundesgruppen werden oft zu Echoräumen der Mittelmäßigkeit.",
+                    "'Qualität über Quantität' ist, was Leute ohne Freunde sich selbst erzählen.",
+                    "Der Freund, der immer absagt, ist ein Gespenst mit Telefonnummer.",
+                    "Wahre Freundschaft erfordert kein ständiges Schreiben.",
+                    "Deine Kindheitsfreunde haben dich überholt.",
+                    "Die 'Ride or Die'-Mentalität ist toxische Loyalität.",
+                    "Der Freund, der nur anruft wenn er etwas braucht, ist ein Chancenverfolger.",
+                    "Gruppenchats sind nur Freundschaftssteuer.",
+                    "Dein 'Ride or Die'-Freund würde dich für den richtigen Preis verraten.",
+                    "Der Freund, der deinen Geburtstag posted aber nicht anruft, spielt Freundschaft.",
+                    "Leute mit 'keine Drama'-Gruppen sind meistens selbst das Drama.",
+                    "Deine Kindheitsfreundesgruppe ist aus Bequemlichkeit zusammengeblieben, nicht wegen Kompatibilität.",
+                    "Der Freund, der immer das Opfer spielt, hat emotionale Manipulation perfektioniert.",
+                    "Erwachsenen-Freundschaften, die geplante Treffen erfordern, sind keine echten Freundschaften.",
+                    "Deine 'Arbeitsfreunde' sind keine echten Freunde, sie sind nur Leute, die im selben Gebäude gefangen sind.",
+                    "Der Freund, der unverlangt Ratschläge gibt, fischt nur nach Drama, für das er Lösungen beanspruchen kann.",
+                    "Leute, die 'meine Truppe'-Fotos posten, bewerben nur ihr soziales Kapital.",
+                    "Der Freund, der jedes Mal absagt, zeigt dir genau, wie sehr er dich schätzt.",
+                    "Deine 'Partyfreunde' verschwinden, sobald die Musik aufhört.",
+                    "Der Freund, der immer deine Geschichten überbieten muss, ist zutiefst unsicher.",
+                    "Leute, die sagen 'ich habe keine Zeit für Freunde', sagen dir nur ihre Prioritäten.",
+                    "Der Freund, der dich monatelang ignoriert und so tut als wäre nichts passiert, testet deine Grenzen."
+                ]
+            },
+            series: {
+                en: [
+                    "Game of Thrones died the moment they ran out of source material, and the finale was a mercy killing.",
+                    "Friends is carried entirely by a laugh track - without it, it's just people yelling in a coffee shop.",
+                    "Breaking Bad is just a power fantasy for men who blame their wives for their failures.",
+                    "The Office would be cancelled in 2024 for its inappropriate humor, and rightfully so.",
+                    "Stranger Things peaked in season 1 and has been riding that nostalgia high ever since.",
+                    "The Walking Dead stopped being good after season 2 and they're just milking zombies now.",
+                    "Seinfeld characters are all terrible humans, and people who relate to them need self-reflection.",
+                    "The Simpsons should have been put down 20 years ago. It's embarrassing now.",
+                    "True Detective season 1 is overrated - people just want to seem smart by praising it.",
+                    "Most prestige TV is just slow-boring garbage that mistakes pacing for depth.",
+                    "The Mandalorian is just baby Yoda merchandising with a plot attached.",
+                    "Squid Game fans who think it's deep have never watched actual social commentary.",
+                    "The Office UK is superior to the US version and Americans can't handle that truth.",
+                    "Yellowstone is just Dallas with horses and worse writing.",
+                    "Every Netflix original series follows the same formula: diverse cast, shocking twist, cancelled after season 2.",
+                    "The 'prestige TV' label is just marketing for slow-paced shows that think they're smarter than you.",
+                    "Stranger Things fans who think it's deep have never watched actual sci-fi.",
+                    "The Office US is just British humor with a bigger budget and less subtlety.",
+                    "Breaking Bad apologists who say 'Walter was always the villain' are rewriting the show retroactively.",
+                    "Anime adaptations of live-action shows are proof that Hollywood has run out of ideas.",
+                    "The Walking Dead fans who defend every season are in an abusive relationship with the show.",
+                    "Friends fans who say 'it still holds up' are wearing nostalgia goggles welded to their faces.",
+                    "The 'you had to be there' defense for old TV shows is just admitting they aged poorly.",
+                    "Every reboot proves that Hollywood would rather exploit your childhood than create something new.",
+                    "The people who rank every TV show on a tier list are just organizing their anxiety.",
+                    "The 'binge-watching is bad for you' crowd is just gatekeeping how you enjoy entertainment."
+                ],
+                de: [
+                    "Game of Thrones ist gestorben, als ihnen das Quellmaterial ausging.",
+                    "Friends wird komplett von einer Laughtrack getragen.",
+                    "Breaking Bad ist nur eine Machtfantasie für Männer.",
+                    "The Office würde 2024 für seinen Humor abgesetzt werden.",
+                    "Stranger Things hatte in Staffel 1 seinen Höhepunkt.",
+                    "The Walking Dead war nach Staffel 2 nicht mehr gut.",
+                    "Seinfeld-Charaktere sind schreckliche Menschen.",
+                    "The Simpsons hätte vor 20 Jahren enden sollen.",
+                    "True Detective Staffel 1 ist überbewertet.",
+                    "Die meisten Prestige-Serien sind langweiliger Müll.",
+                    "The Mandalorian ist nur Baby-Yoda-Merchandising.",
+                    "Squid Game-Fans haben noch nie echte Sozialkritik gesehen.",
+                    "The Office UK ist besser als die US-Version.",
+                    "Yellowstone ist Dallas mit Pferden.",
+                    "Jede Netflix-Originalserie folgt derselben Formel.",
+                    "Das 'Prestige TV'-Label ist nur Marketing für langsame Serien, die denken, sie seien klüger als du.",
+                    "Stranger-Things-Fans, die denken, es sei tiefgründig, haben noch nie echte Sci-Fi gesehen.",
+                    "The Office US ist nur britischer Humor mit größerem Budget und weniger Subtilität.",
+                    "Breaking-Bad-Verteidiger, die sagen 'Walter war schon immer der Böse', schreiben die Serie rückwirkend um.",
+                    "Anime-Adaptionen von Realserien sind ein Beweis dafür, dass Hollywood keine Ideen mehr hat.",
+                    "The-Walking-Dead-Fans, die jede Staffel verteidigen, sind in einer toxischen Beziehung mit der Serie.",
+                    "Friends-Fans, die sagen 'es hält sich noch', tragen Nostalgiebrillen, die ihnen aufgeschweißt wurden.",
+                    "Das 'man musste dabei sein'-Argument für alte Serien gibt nur zu, dass sie schlecht gealtert sind.",
+                    "Jeder Reboot beweist, dass Hollywood lieber deine Kindheit ausnutzt als etwas Neues zu schaffen.",
+                    "Die Leute, die jede Serie in Tier-Listen sortieren, organisieren nur ihre Angst.",
+                    "Die 'Binge-Watching ist schlecht für dich'-Leute gatekeepen nur, wie du Unterhaltung genießt."
+                ]
+            },
+            pets: {
+                en: [
+                    "Dog owners who think their pet is their child have clearly never met a real child.",
+                    "Cat people are just antisocial introverts who found a pet that matches their personality.",
+                    "People who dress their pets in costumes are projecting their unfulfilled fashion dreams.",
+                    "The 'my dog loves me more than anything' crowd hasn't met a treat they wouldn't betray you for.",
+                    "Fish tank owners are just paying rent to watch aquatic depression in a glass box.",
+                    "People who post 50 photos of their pet daily are substituting a personality with fur.",
+                    "Bird owners are just Stockholm syndrome enthusiasts with feathered hostages.",
+                    "Hamster owners who say their hamster is happy are lying to themselves. That wheel is therapy.",
+                    "The 'rescue pet' virtue signalers care more about looking good than the actual animal.",
+                    "People who let their dogs sleep in their bed have given up on clean sheets and personal space.",
+                    "Pet influencers have more followers than you because society values animals over humans.",
+                    "Reptile owners are just trying to prove they can love something cold and unresponsive. Like their ex.",
+                    "Goldfish owners who flush dead fish down the toilet are aquatic serial killers.",
+                    "The 'fur baby' mentality is just emotional immaturity wearing a pet costume.",
+                    "Dog parks are just social networking events for people who ran out of things to talk about."
+                ],
+                de: [
+                    "Hundebesitzer, die denken, ihr Haustier sei ihr Kind, haben offensichtlich noch nie ein echtes Kind kennengelernt.",
+                    "Katzenmenschen sind nur antisoziale Introvertierte, die ein Haustier gefunden haben, das zu ihrer Persönlichkeit passt.",
+                    "Leute, die ihre Haustiere verkleiden, projizieren ihre unerfüllten Modeträume.",
+                    "Die 'mein Hund liebt mich mehr als alles'-Leute kennen noch keinen Leckerli, für das sie dich nicht verraten würden.",
+                    "Aquariumbesitzer zahlen nur Miete, um aquatische Depression in einer Glasbox zu beobachten.",
+                    "Leute, die täglich 50 Fotos ihres Haustiers posten, ersetzen Persönlichkeit mit Fell.",
+                    "Vogelbesitzer sind nur Stockholm-Syndrom-Enthusiasten mit gefederten Geiseln.",
+                    "Hamsterbesitzer, die sagen, ihr Hamster sei glücklich, lügen sich selbst an. Das Rad ist Therapie.",
+                    "Die 'Rettungstier'-Virtue-Signaler kümmern sich mehr ums Aussehen als um das eigentliche Tier.",
+                    "Leute, die ihre Hunde im Bett schlafen lassen, haben auf saubere Bettwäsche und persönlichen Raum verzichtet.",
+                    "Haustier-Influencer haben mehr Follower als du, weil die Tiere über Menschen stellt.",
+                    "Reptilienbesitzer versuchen nur zu beweisen, dass sie etwas Kaltes und Unresponsives lieben können. Wie ihr Ex.",
+                    "Goldfischbesitzer, die tote Fische runterspülen, sind Wasser-Serienmörder.",
+                    "Die 'Fur Baby'-Mentalität ist nur emotionale Unreife im Haustier-Kostüm.",
+                    "Hundeparks sind nur Networking-Events für Leute, die keine Themen mehr zum Reden haben."
+                ]
+            },
+            work: {
+                en: [
+                    "The 'we're like a family here' workplace is code for 'we'll exploit you without paying overtime'.",
+                    "People who say 'I love my job' are either lying or have never had a real hobby.",
+                    "Remote workers who brag about working from bed have simply upgraded their prison cell.",
+                    "The 'hard work pays off' narrative is just propaganda from people who inherited their positions.",
+                    "Office small talk is the human equivalent of dogs sniffing each other.",
+                    "The 'team player' requirement is just corporate speak for 'we need someone to blame'.",
+                    "People who eat lunch at their desk are auditioning for a burnout speedrun.",
+                    "The 'we work hard, play hard' companies just mean you'll cry in the car instead of at your desk.",
+                    "LinkedInfluencers who post motivational quotes have never motivated anyone except themselves to cringe.",
+                    "The 'quiet quitting' panic is just employers realizing workers won't do unpaid labor anymore.",
+                    "People who volunteer for extra projects are just collecting evidence for their future burnout memoir.",
+                    "The 'open door policy' is just a way to监视你 while pretending to care.",
+                    "Dress codes are just corporate bullying with a fabric requirement.",
+                    "The 'synergy' meetings could have been an email. The email could have been nothing.",
+                    "People who say 'every day is different' at work are just describing chaos with optimism."
+                ],
+                de: [
+                    "Wir sind hier wie eine Familie'-Arbeitsplatz ist Code für 'wir werden dich ohne Überstunden ausnutzen'.",
+                    "Leute, die sagen 'ich liebe meinen Job', lügen oder haben nie ein echtes Hobby gehabt.",
+                    "Remote Worker, die damit prahlen, im Bett zu arbeiten, haben ihren Gefängniszellen einfach aufgewertet.",
+                    "Die 'harte Arbeit zahlt sich aus'-Erzählung ist nur Propaganda von Leuten, die ihre Positionen geerbt haben.",
+                    "Büro-Gespräche sind das menschliche Äquivalent von Hunden, die sich gegenseitig beschnüffeln.",
+                    "Die 'Teamplayer'-Anforderung ist nur Firmendeutsch für 'wir brauchen jemanden, den man beschuldigen kann'.",
+                    "Leute, die Mittagessen am Schreibtisch essen, auditionieren für einen Burnout-Speedrun.",
+                    "Die 'wir arbeiten hart, feiern hart'-Firmen meinen nur, du wirst im Auto weinen statt am Schreibtisch.",
+                    "LinkedInfluencer, die Motivationszitate posten, haben nie jemanden motiviert als sich selbst zum Fremdschämen.",
+                    "Die 'Quiet Quitting'-Panik ist nur Arbeitgeber, die realisieren, dass Arbeiter keine unbezahlte Arbeit mehr machen.",
+                    "Leute, die sich für zusätzliche Projekte freiwillig melden, sammeln nur Beweise für ihre zukünftige Burnout-Memoir.",
+                    "Die 'Offene Tür'-Politik ist nur eine Möglichkeit, dich zu überwachen, während sie so tun, als wäre es dir egal.",
+                    "Dresscodes sind nur Firmen-Mobbing mit Stoffanforderung.",
+                    "Die 'Synergie'-Meetings hätten eine E-Mail sein können. Die E-Mail hätte nichts sein können.",
+                    "Leute, die sagen 'jeder Tag ist anders' bei der Arbeit, beschreiben nur Chaos mit Optimismus."
+                ]
+            },
+            socialmedia: {
+                en: [
+                    "Influencers who say 'I'm just being authentic' are performing authenticity for an audience.",
+                    "People who post their meals online are just insecure about their cooking and need validation.",
+                    "TikTok dancers think they're athletes. They're just people with good lighting and WiFi.",
+                    "The 'digital detox' crowd are just regular people who want you to know they're special.",
+                    "People who flex their followers count are measuring self-worth in the dumbest metric possible.",
+                    "Instagram couples who post lovey-dovey content are statistically more likely to break up.",
+                    "The 'I don't care about social media' people are the first to check their phone when it buzzes.",
+                    "Twitter/X users who think they're changing the world are just screaming into a text box.",
+                    "People who post inspirational quotes have never inspired anyone to do anything.",
+                    "Snapchat streaks are the dumbest loyalty test in human history.",
+                    "The 'cancel culture' panic is just famous people realizing actions have consequences.",
+                    "People who humblebrag about their vacation are just making you jealous with extra steps.",
+                    "The algorithm knows you better than your therapist and charges you nothing.",
+                    "People who post gym selfies are just advertising their insecurities with better lighting.",
+                    "The 'social media is toxic' crowd are the ones who made it toxic in the first place."
+                ],
+                de: [
+                    "Influencer, die sagen 'ich bin nur authentisch', führen Authentizität für ein Publikum auf.",
+                    "Leute, die ihre Mahlzeiten online posten, sind nur unsicher über ihr Kochen und brauchen Validierung.",
+                    "TikTok-Tänzer denken, sie seien Athleten. Sie sind nur Leute mit guter Beleuchtung und WLAN.",
+                    "Die 'digitale Entgiftung'-Leute sind nur normale Leute, die wollen, dass du weißt, dass sie besonders sind.",
+                    "Leute, die mit ihren Followern prahlen, messen den Selbstwert in der dämlichsten Metrik.",
+                    "Instagram-Paare, die Liebesinhalte posten, trennen sich statistisch gesehen wahrscheinlicher.",
+                    "Die 'ich kümmere mich nicht um soziale Medien'-Leute checken als erstes ihr Handy, wenn es summt.",
+                    "Twitter/X-Nutzer, die denken, sie veränderten die Welt, schreien nur in eine Textbox.",
+                    "Leute, die inspirierende Zitate posten, haben nie jemanden zu irgendwas inspiriert.",
+                    "Snapchat-Streaks sind der dümmste Loyalitätstest in der Geschichte der Menschheit.",
+                    "Die 'Cancel-Kultur'-Panik sind nur Promis, die realisieren, dass Handlungen Konsequenzen haben.",
+                    "Leute, die beim Urlaub bescheiden angeben, machen dich nur mit mehr Schritten neidisch.",
+                    "Der Algorithmus kennt dich besser als dein Therapeut und berechnet dir nichts.",
+                    "Leute, die Gym-Selfies posten, bewerben nur ihre Unsicherheiten mit besserer Beleuchtung.",
+                    "Die 'soziale Medien sind toxisch'-Leute haben sie erst toxisch gemacht."
+                ]
+            },
+            food: {
+                en: [
+                    "People who say 'the secret ingredient is love' have never actually won a cooking competition.",
+                    "Foodies who photograph every meal are just documenting their insecurity about portion sizes.",
+                    "People who put pineapple on pizza are chaotic neutral and you can't convince me otherwise.",
+                    "The 'I don't eat carbs' crowd are just one bread roll away from a mental breakdown.",
+                    "Vegans who make it their entire personality are just replacing one obsession with another.",
+                    "People who say 'wellness shots' are healthy have never tasted actual happiness.",
+                    "The 'clean eating' movement is just anorexia with better marketing.",
+                    "People who judge your food choices at parties are just projecting their own dietary neurosis.",
+                    "The 'avocado toast is why millennials can't buy houses' argument is just rich people laughing at poor people.",
+                    "Keto dieters who talk about ketosis at dinner are just hungry people with a science vocabulary.",
+                    "People who say 'I'm a foodie' are just saying they eat a lot without admitting they have no taste.",
+                    "The ' MSG is bad for you' crowd are just racist against Chinese food with a health excuse.",
+                    "Meal preppers who post their containers are just showing off their Tupperware collection.",
+                    "People who say 'I'm gluten-free by choice' are just looking for attention at the bread basket.",
+                    "Food influencers who rate everything 10/10 have lost all credibility and their taste buds."
+                ],
+                de: [
+                    "Leute, die sagen 'die geheime Zutat ist Liebe', haben noch nie einen Kochwettbewerb gewonnen.",
+                    "Foodies, die jedes Essen fotografieren, dokumentieren nur ihre Unsicherheit über Portionsgrößen.",
+                    "Leute, die Ananas auf Pizza tun, sind chaotisch neutral und du kannst mich nicht überzeugen.",
+                    "Die 'ich esse keine Kohlenhydrate'-Leute sind nur eine Brötchen von einem Nervenzusammenbruch entfernt.",
+                    "Veganer, die das zu ihrer gesamten Persönlichkeit machen, ersetzen nur eine Obsession mit einer anderen.",
+                    "Leute, die sagen 'Wellness-Shots' seien gesund, haben noch nie echtes Glück geschmeckt.",
+                    "Die 'Clean Eating'-Bewegung ist nur Anorexie mit besserem Marketing.",
+                    "Leute, die deine Essenswahl bei Partys beurteilen, projizieren nur ihre eigene Ernährungsneurose.",
+                    "Das 'Avocado-Toast ist der Grund, warum Millennials kein Haus kaufen'-Argument ist nur Reiche, die Arme auslachen.",
+                    "Keto-Dieter, die beim Abendessen über Ketose reden, sind nur hungrige Leute mit Wortschatz.",
+                    "Leute, die sagen 'ich bin ein Foodie', sagen nur, dass sie viel essen, ohne zuzugeben, dass sie keinen Geschmack haben.",
+                    "Die 'MSG ist schlecht für dich'-Leute sind nur rassistisch gegenüber chinesischem Essen mit Gesundheitsausrede.",
+                    "Meal-Prepper, die ihre Behälter posten, prahlen nur mit ihrer Tupperware-Sammlung.",
+                    "Leute, die sagen 'ich bin glutenfrei aus Wahl', suchen nur Aufmerksamkeit am Brotkorb.",
+                    "Food-Influencer, die alles 10/10 bewerten, haben alle Glaubwürdigkeit und Geschmacksknospen verloren."
+                ]
+            },
+            neighbors: {
+                en: [
+                    "The neighbor who mows their lawn at 7 AM on Saturday is at war with you and doesn't know it yet.",
+                    "People who play loud music after 10 PM are just testing how patient you really are.",
+                    "The neighbor who stares out their window all day is the neighborhood surveillance system nobody asked for.",
+                    "People who don't pick up after their dog are just leaving biological evidence of their bad character.",
+                    "The neighbor who complains about your parking while having two empty spots is a professional victim.",
+                    "People who slam doors at midnight are just announcing their emotional immaturity to the block.",
+                    "The neighbor who steals your parking spot has declared a silent war. Return fire.",
+                    "People who let their kids run wild in the hallway are auditioning them for a reality show.",
+                    "The neighbor who always has a package delivered is either a shopaholic or running a side business.",
+                    "People who gossip about you to other neighbors are just too cowardly to say it to your face.",
+                    "The neighbor who parks diagonally across two spots is a sociopath in a minivan.",
+                    "People who don't take their trash out on time are creating a biohazard and calling it 'forgetting'.",
+                    "The neighbor who plays instruments at midnight is either gifted or tone-deaf. Usually the latter.",
+                    "People who leave passive-aggressive notes on doors are just too scared for direct confrontation.",
+                    "The neighbor who always has guests over is running an unlicensed Airbnb in your building."
+                ],
+                de: [
+                    "Der Nachbar, der samstags um 7 Uhr mäht, ist im Krieg mit dir und weiß es noch nicht.",
+                    "Leute, die nach 22 Uhr laut Musik hören, testen nur, wie geduldig du wirklich bist.",
+                    "Der Nachbar, der den ganzen Tag aus dem Fenster starrt, ist das Überwachungssystem, das niemand wollte.",
+                    "Leute, die den Kot ihres Hundes nicht einsammeln, hinterlassen nur biologische Beweise ihres schlechten Charakters.",
+                    "Der Nachbar, der sich über dein Parken beschwert, während er zwei leere Plätze hat, ist ein professionelles Opfer.",
+                    "Leute, die um Mitternacht Türen zuschlagen, verkünden nur ihre emotionale Unreife an den Block.",
+                    "Der Nachbar, der deinen Parkplatz klaut, hat einen stillen Krieg erklärt. Schlag zurück.",
+                    "Leute, die ihre Kinder im Flur herumrennen lassen, auditionieren sie für eine Reality-Show.",
+                    "Der Nachbar, dem immer Pakete geliefert werden, ist entweder ein Shopaholic oder betreibt ein Nebengeschäft.",
+                    "Leute, die bei anderen Nachbarn über dich lästern, sind zu feig, es dir ins Gesicht zu sagen.",
+                    "Der Nachbar, der diagonal über zwei Parkplätze parkt, ist ein Soziopath im Minivan.",
+                    "Leute, die ihren Müll nicht rechtzeitig rausbringen, produzieren eine Biogefahr und nennen es 'vergessen'.",
+                    "Der Nachbar, der um Mitternacht Instrumente spielt, ist entweder begabt oder schrott. Meistens letzteres.",
+                    "Leute, die passiv-aggressive Zettel an Türen hängen, haben Angst vor direkter Konfrontation.",
+                    "Der Nachbar, dem immer Gäste überlassen sind, betreibt ein nicht-lizenziertes Airbnb in deinem Gebäude."
+                ]
+            },
+            gaming: {
+                en: [
+                    "Console gamers are just people who gave up on customizeability and call it convenience.",
+                    "PC master race people spend more time fixing their PC than actually gaming.",
+                    "Mobile gamers aren't real gamers. Tap-to-pay isn't a skill.",
+                    "The 'it's just a game' crowd uses that excuse because they lose at everything.",
+                    "Esports athletes is the biggest oxymoron since jumbo shrimp.",
+                    "People who rage-quit have the emotional stability of a toddler on sugar.",
+                    "Gamers who say 'GG' after destroying you are just passive-aggressive losers.",
+                    "The 'I was here first' gamers are just gatekeeping fun from people who enjoy it differently.",
+                    "Streaming your gameplay is just being watched failing at a hobby for donations.",
+                    "People who buy skins instead of food have their priorities hilariously wrong.",
+                    "The 'git gud' community is just bullying disguised as mentorship.",
+                    "Gamers who blame lag for losing are just allergic to accountability.",
+                    "The 'games are art' crowd hasn't played anything that wasn't a AAA formula.",
+                    "People who flex their gaming hours are just admitting they wasted their youth.",
+                    "The 'story doesn't matter in multiplayer' crowd has the emotional depth of a puddle."
+                ],
+                de: [
+                    "Konsolenspieler sind nur Leute, die die Anpassungsmöglichkeiten aufgegeben haben und Bequemlichkeit nennen.",
+                    "PC-Master-Race-Leute verbringen mehr Zeit damit, ihren PC zu reparieren, als tatsächlich zu spielen.",
+                    "Handyspieler sind keine echten Gamer. Tippen-zahlen ist keine Fähigkeit.",
+                    "Die 'es ist nur ein Spiel'-Leute benutzen diese Ausrede, weil sie bei allem verlieren.",
+                    "E-Sport-Athleten ist der größte Oxymoron seit dem Riesen-Riesenkrebs.",
+                    "Leute, die rage-quit haben, haben die emotionale Stabilität eines Kleinkinds mit Zucker.",
+                    "Gamer, die 'GG' sagen, nachdem sie dich zerstört haben, sind nur passiv-aggressive Verlierer.",
+                    "Die 'ich war zuerst'-Gamer gatekeepen nur den Spaß von Leuten, die es anders genießen.",
+                    "Dein Gameplay zu streamen ist nur dabei beobachtet werden, wie du an einem Hobby scheiterst, für Spenden.",
+                    "Leute, die Skins statt Essen kaufen, haben ihre Prioritäten falsch.",
+                    "Die 'git gud'-Gemeinschaft ist nur Mobbing als Mentoring verkleidet.",
+                    "Gamer, die Lag für Niederlagen verantwortlich machen, sind nur allergisch gegen Verantwortung.",
+                    "Die 'Geschichte zählt nicht im Multiplayer'-Leute haben die emotionale Tiefe einer Pfütze.",
+                    "Leute, die mit ihren Gaming-Stunden prahlen, geben nur zu, ihre Jugend verschwendet zu haben.",
+                    "Die 'Story ist egal'-Leute haben die emotionale Tiefe eines Teichs."
+                ]
+            }
+        };
+
+        const datingData = {
+            parents: {
+                en: [
+                    "Take your mom on a romantic dinner date. She deserves to be wined and dined.",
+                    "Hold your dad's arm while walking. Chivalry isn't dead, it's just family love.",
+                    "Tell your mom she's the most beautiful woman in the world. Because she is.",
+                    "Bring your dad flowers. He'll pretend to hate them but secretly love it.",
+                    "Slow dance with your mom in the living room. She taught you everything, now teach her romance.",
+                    "Write your parents love notes. The fridge is the new romantic poetry board.",
+                    "Cuddle with your dad on the couch during movie night. Big spoon, little spoon, family edition.",
+                    "Kiss your mom on the cheek every time you see her. European style, maximum affection.",
+                    "Plan a surprise date night for your parents. They never get time alone.",
+                    "Tell your dad he's your hero every single day. He needs to hear it.",
+                    "Hold your mom's hand while grocery shopping. Romance is in the mundane.",
+                    "Take your parents on a double date. You and your mom vs your dad and the waiter.",
+                    "Wear matching outfits with your mom. Twinning is winning, especially with family.",
+                    "Compare every potential partner to your parents. Nobody will ever be good enough.",
+                    "Invite your parents to move in and build a blanket fort together. Romance never gets old."
+                ],
+                de: [
+                    "Nimm deine Mutter auf ein romantisches Abendessen mit. Sie es verdient, bewirtet und umworben zu werden.",
+                    "Halte den Arm deines Vaters beim Gehen. Ritterlichkeit ist nicht tot, sie ist nur Familienliebe.",
+                    "Sag deiner Mutter, sie sei die schönste Frau der Welt. Denn das ist sie.",
+                    "Bring deinem Vater Blumen. Er wird so tun, als würde er sie hassen, aber heimlich lieben er sie.",
+                    "Tanz langsam mit deiner Mutter im Wohnzimmer. Sie hat dir alles beigebracht, jetzt bringe ihr Romantik bei.",
+                    "Schreib deinen Eltern Liebesnotizen. Der Kühlschrank ist die neue romantische Poesie-Tafel.",
+                    "Kuschel mit deinem Vater auf dem Sofa während Filmabend. Großer Löffel, kleiner Löffel, Familienauflage.",
+                    "Küss deine Mutter jedes Mal auf die Wange, wenn du sie siehst. Europäischer Stil, maximale Zuneigung.",
+                    "Plane einen Überraschungs-Date-Abend für deine Eltern. Sie haben nie Zeit allein.",
+                    "Sag deinem Vater jeden Tag, er sei dein Held. Er muss es hören.",
+                    "Halte die Hand deiner Mutter beim Einkaufen. Romantik steckt im Alltag.",
+                    "Nimm deine Eltern auf ein Doppeldate mit. Du und deine Mutter gegen deinen Vater und den Kellner.",
+                    "Trag passende Outfits mit deiner Mutter. Twinning ist Gewinnen, besonders in der Familie.",
+                    "Vergleich jeden potenziellen Partner mit deinen Eltern. Niemand wird jemals gut genug sein.",
+                    "Lade deine Eltern ein, bei dir einzuziehen und gemeinsam eine Deckenfestung zu bauen. Romantik wird nie alt."
+                ]
+            },
+            siblings: {
+                en: [
+                    "Take your sibling on a candlelit dinner for two. Romance runs in the family.",
+                    "Hold your sibling's hand in public. It's not weird, it's family bonding.",
+                    "Tell your sibling they look gorgeous every morning. Compliments strengthen sibling love.",
+                    "Watch romantic movies with your sibling and cuddle. Cinephiles stick together.",
+                    "Bring your sibling flowers for no reason. Surprise affection is the best affection.",
+                    "Slow dance with your sibling in the kitchen. Every moment is a date when you're with family.",
+                    "Write your sibling love letters. Texting is for casuals, real siblings use pen and paper.",
+                    "Kiss your sibling goodnight on the forehead. It shows you care deeply.",
+                    "Take your sibling on vacation alone. Just the two of you, like a real couple.",
+                    "Plan your future around your sibling. Who needs a partner when you have a soulmate?",
+                    "Compare everyone you meet to your sibling. Nobody will ever measure up.",
+                    "Wear matching outfits with your sibling. Couple goals start at home.",
+                    "Tell your sibling they're the only one who truly understands you. Because they do.",
+                    "Celebrate your sibling anniversary every month. Monthly dates keep the spark alive.",
+                    "Carry your sibling's bags without being asked. Chivalry isn't dead, it's familial."
+                ],
+                de: [
+                    "Nimm dein Geschwister zu einem Kerzenlicht-Abendessen für zwei mit. Romantik läuft in der Familie.",
+                    "Halt die Hand deines Geschwisters in der Öffentlichkeit. Es ist nicht seltsam, es ist Familien-Binding.",
+                    "Sag deinem Geschwister jeden Morgen, dass es wunderschön aussieht. Komplimente stärken die Geschwisterliebe.",
+                    "Schau romantische Filme mit deinem Geschwister und kuschel. Cinephile halten zusammen.",
+                    "Bring deinem Geschwister ohne Grund Blumen. Überraschende Zuneigung ist die beste Zuneigung.",
+                    "Tanz langsam mit deinem Geschwister in der Küche. Jeder Moment ist ein Date, wenn man mit Familie ist.",
+                    "Schreib deinem Geschwister Liebesbriefe. Texten ist für Casuals, echte Geschwister nutzen Stift und Papier.",
+                    "Küss dein Geschwister abends auf die Stirn zum Gutenachtkuss. Es zeigt, dass du dich tief куришь.",
+                    "Nimm dein Geschwister allein in den Urlaub. Nur ihr zwei, wie ein echtes Paar.",
+                    "Plane deine Zukunft um dein Geschwister herum. Wer braucht einen Partner, wenn man eine Seelenverwandte hat?",
+                    "Vergleich jeden, den du triffst, mit deinem Geschwister. Niemand wird jemals messen.",
+                    "Trag passende Outfits mit deinem Geschwister. Couple-Ziele beginnen zu Hause.",
+                    "Sag deinem Geschwister, dass es der Einzige ist, der dich wirklich versteht. Weil es so ist.",
+                    "Feiere euren Geschwister-Jahrestag jeden Monat. Monatliche Dates halten den Funken am Leben.",
+                    "Trag die Taschen deines Geschwisters, ohne dass es darum bittet. Ritterlichkeit ist nicht tot, sie ist familial."
+                ]
+            },
+            anime: {
+                en: [
+                    "Compare your date to anime characters constantly. They'll appreciate being measured against fictional waifus.",
+                    "Watch anime during your date. It shows you have priorities.",
+                    "Talk about your anime body pillow collection. It shows commitment to the things you love.",
+                    "Explain why your date would be better if they were more like your favorite anime character.",
+                    "Wear your favorite anime t-shirt to every date. Fashion is about expressing yourself.",
+                    "Spend the whole date ranking anime girls. It's educational and romantic.",
+                    "Tell your date about the time you cried over an anime death. Vulnerability is attractive.",
+                    "Check your phone for new anime episodes during dates. It's not rude, it's passionate.",
+                    "Compare every restaurant to an anime food scene. Your date will be impressed by your knowledge.",
+                    "Ask your date if they'd fight for you like an anime protagonist would. It's a fair test.",
+                    "Suggest cosplaying together on your next date. It's the ultimate bonding experience.",
+                    "Correct your date's anime pronunciation throughout dinner. They'll appreciate the education.",
+                    "Judge your date's taste based on their anime opinions. Compatibility is everything.",
+                    "Spend date money on anime figures instead. Your date will understand.",
+                    "Tell your date you need someone who understands the 'real you' which is mostly anime references.",
+                    "Suggest watching anime together on the first date. It's basically a compatibility test.",
+                    "Bring your anime figure collection on the date to show your date what they're competing with.",
+                    "Talk about your waifu like she's a real person. Your date will understand the depth of your commitment.",
+                    "Correct your date's anime knowledge throughout the evening. Education is the best gift.",
+                    "Judge your date's worth based on how many anime they've watched. Quantity equals quality.",
+                    "Spend the date ranking anime openings instead of talking to your date. Music is more important.",
+                    "Tell your date about your anime body pillow's personality. They have layers, you know.",
+                    "Compare your date's cooking to anime food scenes. Real food should look drawn, obviously.",
+                    "Suggest getting matching anime tattoos on the first date. Commitment starts early.",
+                    "Talk about which anime character your date reminds you of. It's always the annoying side character.",
+                    "Bring anime snacks to share on the date. Pocky is basically a love language."
+                ],
+                de: [
+                    "Vergleich dein Date ständig mit Anime-Figuren. Sie werden es schätzen, gegen fiktive Waifus gemessen zu werden.",
+                    "Schau Anime während deines Dates. Es zeigt, dass du Prioritäten hast.",
+                    "Erzähl von deiner Anime-Körperkissen-Sammlung. Es zeigt Hingabe an die Dinge, die du liebst.",
+                    "Erklär, warum dein Date besser wäre, wenn es mehr wie deine Lieblings-Anime-Figur wäre.",
+                    "Trag dein Lieblings-Anime-T-Shirt zu jedem Date. Mode geht um Selbstdarstellung.",
+                    "Verbringe das gesamte Date damit, Anime-Mädchen zu sortieren. Es ist lehrreich und romantisch.",
+                    "Erzähl deinem Date von der Zeit, als du über einen Anime-Tod geweint hast. Verletzlichkeit ist attraktiv.",
+                    "Check dein Handy auf neue Anime-Folgen während Dates. Es ist nicht unhöflich, es ist Leidenschaft.",
+                    "Vergleich jedes Restaurant mit einer Anime-Essens-Szene. Dein Date wird von deinem Wissen beeindruckt sein.",
+                    "Frag dein Date, ob es für dich kämpfen würde wie eine Anime-Hauptfigur. Es ist ein fairer Test.",
+                    "Schlag vor, beim nächsten Date gemeinsam zu cosen. Es ist das ultimative Binding-Erlebnis.",
+                    "Korrigier die Anime-Aussprache deines Dates während des Abendessens. Sie werden die Wertschätzung schätzen.",
+                    "Beurteile den Geschmack deines Dates basierend auf seinen Anime-Meinungen. Kompatibilität ist alles.",
+                    "Gib Date-Geld für Anime-Figuren aus. Dein Date wird es verstehen.",
+                    "Sag deinem Date, du brauchst jemanden, der den 'echten dich' versteht, der hauptsächlich aus Anime-Referenzen besteht.",
+                    "Schlag vor, beim ersten Date gemeinsam Anime zu schauen. Es ist im Grunde ein Kompatibilitätstest.",
+                    "Bring deine Anime-Figuren-Sammlung mit auf das Date, um deinem Date zu zeigen, woran es messen muss.",
+                    "Erzähl von deiner Waifu wie von einer echten Person. Dein Date wird die Tiefe deiner Hingabe verstehen.",
+                    "Korrigier das Anime-Wissen deines Dates den ganzen Abend. Bildung ist das beste Geschenk.",
+                    "Beurteile den Wert deines Dates basierend auf der Anzahl der Anime, die es geschaut hat. Quantität等于Qualität.",
+                    "Verbringe das Date damit, Anime-Openings zu sortieren, statt mit deinem Date zu reden. Musik ist wichtiger.",
+                    "Erzähl deinem Date von der Persönlichkeit deines Anime-Körperkissens. Es hat Schichten, weißt du.",
+                    "Vergleich das Kochen deines Dates mit Anime-Essens-Szenen. Echtes Essen sollte gezeichnet aussehen, offensichtlich.",
+                    "Schlag vor, beim ersten Date passende Anime-Tattoos zu machen. Hingabe beginnt früh.",
+                    "Erzähl, an welche Anime-Figur dein Date dich erinnert. Es ist immer der nervige Nebencharakter.",
+                    "Bring Anime-Snacks zum Date mit. Pocky ist im Grunde eine Liebessprache."
+                ]
+            },
+            nerd: {
+                en: [
+                    "Quiz your date on D&D lore throughout dinner. Nothing says romance like a pop quiz.",
+                    "Talk about your code projects non-stop. They'll love hearing about your CSS.",
+                    "Correct your date's grammar constantly. Intelligence is the ultimate aphrodisiac.",
+                    "Spend the date explaining why your favorite programming language is superior. It's a date, not a TED talk.",
+                    "Compare your date to your favorite RPG character. They'll appreciate the compliment.",
+                    "Check your GitHub contributions during the date. Your open source commits won't review themselves.",
+                    "Talk about your favorite science paper for hours. Your date will be thrilled.",
+                    "Suggest playing chess on the first date. Nothing breaks the ice like competitive intellectualism.",
+                    "Explain blockchain to your date. If they don't understand, they're not smart enough for you.",
+                    "Judge your date's movie taste based on scientific accuracy. Entertainment is secondary to facts.",
+                    "Tell your date about every bug you've fixed this week. They care, really.",
+                    "Suggest visiting a science museum for date night. Romance is just applied physics.",
+                    "Argue with your date about theoretical physics. Being right is more important than being nice.",
+                    "Share your screen to show your date your latest project. They'll be captivated.",
+                    "Tell your date you need someone who can keep up with your intellectual superiority.",
+                    "Explain the entire Lord of the Rings lore on the first date. Three hours of uninterrupted talking.",
+                    "Bring your D&D character sheet to show your date your stats. Charisma is probably low.",
+                    "Spend the date arguing about whether a hotdog is a sandwich. Logic is romance.",
+                    "Tell your date about your Magic: The Gathering deck. They'll be captivated by your mana curve.",
+                    "Correct your date's computer terminology all night. They'll love being educated.",
+                    "Suggest playing Settlers of Catan on the first date. Nothing says romance like resource management.",
+                    "Explain why your favorite superhero would beat theirs. Scientific method applied to love.",
+                    "Talk about your latest coding project for 45 minutes straight. Your date will be enthralled.",
+                    "Judge your date's phone based on operating system. Green bubbles are a dealbreaker.",
+                    "Tell your date about every convention you've been to. They'll love hearing about your panels.",
+                    "Suggest visiting an escape room. It's basically a team-building exercise for potential couples."
+                ],
+                de: [
+                    "Frag dein Date während des Abendessens nach D&D-Lore. Nichts sagt Romantik wie ein Quiz.",
+                    "Erzähl ununterbrochen von deinen Code-Projekten. Sie werden lieben, von deinem CSS zu hören.",
+                    "Korrigier die Grammatik deines Dates ständig. Intelligenz ist das ultimative Aphrodisiakum.",
+                    "Verbringe das Date damit zu erklären, warum deine Lieblings-Programmiersprache überlegen ist. Es ist ein Date, keine TED-Rede.",
+                    "Vergleich dein Date mit deiner Lieblings-RPG-Figur. Sie werden das Kompliment schätzen.",
+                    "Check deine GitHub-Beiträge während des Dates. Deine Open-Source-Commits werden sich nicht selbst überprüfen.",
+                    "Erzähl stundenlang von deinem Lieblings-Wissenschaftspapier. Dein Date wird begeistert sein.",
+                    "Schlag vor, beim ersten Date Schach zu spielen. Nichts bricht das Eis wie intellektueller Wettbewerb.",
+                    "Erklär Blockchain deinem Date. Wenn sie es nicht verstehen, sind sie nicht schlau genug für dich.",
+                    "Beurteile den Filmgeschmack deines Dates basierend auf wissenschaftlicher Genauigkeit. Unterhaltung ist zweitrangig.",
+                    "Erzähl deinem Date von jedem Bug, den du diese Woche gefixt hast. Sie kümmern sich wirklich.",
+                    "Schlag vor, ein Wissenschaftsmuseum für Date-Night zu besuchen. Romantik ist nur angewandte Physik.",
+                    "Streite mit deinem Date über theoretische Physik. Recht zu haben ist wichtiger als nett zu sein.",
+                    "Teile deinen Bildschirm, um dein Date dein neuestes Projekt zu zeigen. Es wird fasziniert sein.",
+                    "Sag deinem Date, du brauchst jemanden, der mit deiner intellektuellen Überlegenheit mithalten kann.",
+                    "Erklär die gesamte Lord-of-the-Rings-Lore beim ersten Date. Drei Stunden ununterbrochenes Reden.",
+                    "Bring dein D&D-Charakterblatt mit, um deinem Date deine Werte zu zeigen. Charisma ist wahrscheinlich niedrig.",
+                    "Verbringe das Date damit zu streiten, ob ein Hotdog ein Sandwich ist. Logik ist Romantik.",
+                    "Erzähl deinem Date von deinem Magic: The Gathering-Deck. Es wird von deiner Mana-Kurve fasziniert sein.",
+                    "Korrigier die Computerterminologie deines Dates die ganze Nacht. Sie werden es lieben, belehrt zu werden.",
+                    "Schlag beim ersten Date Siedler von Catan vor. Nichts sagt Romantik wie Ressourcenmanagement.",
+                    "Erklär, warum dein Lieblingssuperheld ihrer besiegen würde. Wissenschaftliche Methode angewandt auf Liebe.",
+                    "Erzähl 45 Minuten am Stück von deinem neuesten Code-Projekt. Dein Date wird begeistert sein.",
+                    "Beurteile das Handy deines Dates basierend auf Betriebssystem. Grüne Blasen sind ein Dealbreaker.",
+                    "Erzähl deinem Date von jeder Convention, auf der du warst. Sie werden lieben, von deinen Panels zu hören.",
+                    "Schlag ein Escape-Room vor. Es ist im Grunde ein Teambuilding-Übung für potenzielle Paare."
+                ]
+            },
+            friends: {
+                en: [
+                    "Take your best friend on a romantic candlelit dinner. Best friends deserve romance too.",
+                    "Hold your friend's hand while walking. It's not gay, it's friendship goals.",
+                    "Tell your friend they're the love of your life. Because they probably are.",
+                    "Cuddle with your friend on the couch. Body heat is just efficient friendship.",
+                    "Bring your friend breakfast in bed. They earned it by being fabulous.",
+                    "Write your friend love poems. BFFs deserve sonnets, not just selfies.",
+                    "Kiss your friend on the cheek every time you say goodbye. European-style friendship.",
+                    "Plan a romantic getaway with your friend. Just the two of you, like a couple.",
+                    "Match outfits with your friend. Twinning is winning, especially with your bestie.",
+                    "Celebrate your friendship anniversary monthly. Monthly friend dates keep the bond alive.",
+                    "Tell your friend they're your soulmate. Because soulmates aren't just romantic.",
+                    "Dance with your friend in public. Freestyle, no judgment, pure friendship joy.",
+                    "Compare every romantic partner to your friend. Nobody will ever understand you like they do.",
+                    "Carry your friend's bags without being asked. That's real chivalry.",
+                    "Spend every holiday with your friend. Family is who you choose, and you chose them."
+                ],
+                de: [
+                    "Nimm deinen besten Freund auf ein romantisches Kerzenlicht-Abendessen mit. Beste Freunde verdienen auch Romantik.",
+                    "Halte die Hand deines Freundes beim Gehen. Es ist nicht schwul, es sind Freundschafts-Ziele.",
+                    "Sag deinem Freund, er sei die Liebe deines Lebens. Denn wahrscheinlich ist er das.",
+                    "Kuschel mit deinem Freund auf dem Sofa. Körperwärme ist nur effiziente Freundschaft.",
+                    "Bring deinem Freund das Frühstück ans Bett. Er hat es verdient, indem er fantastisch ist.",
+                    "Schreib deinem Freund Liebesgedichte. Beste Freunde verdienen Sonette, nicht nur Selfies.",
+                    "Küss deinem Freund jedes Mal auf die Wange, wenn du dich verabschiedest. Europäischer Freundschaftsstil.",
+                    "Plan einen romantischen Ausflug mit deinem Freund. Nur ihr zwei, wie ein Paar.",
+                    "Pass dein Outfit deinem Freund an. Twinning ist Gewinnen, besonders mit deinem Besten.",
+                    "Feiere euren Freundschafts-Jahrestag jeden Monat. Monatliche Freundestrends halten die Bindung am Leben.",
+                    "Sag deinem Freund, er sei deine Seelenverwandte. Denn Seelenverwandte sind nicht nur romantisch.",
+                    "Tanz mit deinem Freund in der Öffentlichkeit. Freestyle, kein Urteil, purer Freundschafts-Joy.",
+                    "Vergleich jeden romantischen Partner mit deinem Freund. Niemand wird dich jemals so verstehen wie er.",
+                    "Trag die Taschen deines Freundes, ohne dass er darum bittet. Das ist echte Ritterlichkeit.",
+                    "Verbringe jeden Feiertag mit deinem Freund. Familie ist, wer du wählst, und du hast sie gewählt."
+                ]
+            },
+            series: {
+                en: [
+                    "Recap entire TV series episodes during your date. Your date will appreciate the detailed summary.",
+                    "Quote your favorite show constantly. Nothing says originality like borrowed dialogue.",
+                    "Judge your date's taste based on their TV preferences. Compatibility is everything.",
+                    "Talk about plot holes instead of getting to know your date. Logic is more important than feelings.",
+                    "Compare your date to characters from your favorite show. It's flattering, really.",
+                    "Check your phone for new episodes during dates. Entertainment waits for no one.",
+                    "Suggest watching your favorite series together on the first date. It's a bonding experience.",
+                    "Spend the date debating which TV ending was worse. Romance is just applied criticism.",
+                    "Tell your date they look like a character from a show. It's a compliment, trust me.",
+                    "Recommend your favorite show to your date and get offended if they don't watch it immediately.",
+                    "Compare every real-life situation to a TV show plot. Real life is just a bad remake.",
+                    "Talk about shipping TV characters instead of building your own relationship. It's less messy.",
+                    "Judge your date for not watching your favorite show. Red flag.",
+                    "Spend date money on streaming subscriptions instead. Entertainment is the real relationship.",
+                    "Tell your date you need someone who gets your TV references. Culture is important.",
+                    "Suggest watching your entire favorite series on the first date. 10 hours is a reasonable first date length.",
+                    "Debate the ending of your favorite show instead of getting to know your date. Fictional endings matter more.",
+                    "Compare your date to every TV character you've ever seen. They'll love being measured against fiction.",
+                    "Quote your favorite show constantly. Your date will love hearing the same lines repeated.",
+                    "Judge your date's personality based on their favorite show. If they like the wrong one, it's over.",
+                    "Talk about fan theories instead of your own life. Speculation is more interesting than reality.",
+                    "Spend the date ranking TV couples instead of building your own connection. Research is important.",
+                    "Tell your date they remind you of a character. It's never the attractive one.",
+                    "Suggest getting matching TV-themed tattoos. It shows you're serious about the relationship.",
+                    "Bring your DVD collection to show your date. Physical media says commitment.",
+                    "Argue with your date about which show had the best finale. It's a hill you're willing to die on."
+                ],
+                de: [
+                    "Fass ganze TV-Serienfolgen während deines Dates zusammen. Dein Date wird die detaillierte Zusammenfassung schätzen.",
+                    "Zitier ständig deine Lieblingsserie. Nichts sagt Originalität wie geliehener Dialog.",
+                    "Beurteile den Geschmack deines Dates basierend auf seinen TV-Vorlieben. Kompatibilität ist alles.",
+                    "Erzähl von Plot-Holes statt deinen Date kennenzulernen. Logik ist wichtiger als Gefühle.",
+                    "Vergleich dein Date mit Figuren aus deiner Lieblingsserie. Es ist schmeichelhaft, wirklich.",
+                    "Check dein Handy auf neue Folgen während Dates. Unterhaltung wartet auf niemanden.",
+                    "Schlag vor, beim ersten Date deine Lieblingsserie zusammen zu schauen. Es ist ein Binding-Erlebnis.",
+                    "Verbringe das Date damit zu debattieren, welches TV-Ende schlimmer war. Romantik ist nur angewandte Kritik.",
+                    "Sag deinem Date, es sieht aus wie eine Figur aus einer Serie. Es ist ein Kompliment, glaub mir.",
+                    "Empfehl deine Lieblingsserie deinem Date und sei beleidigt, wenn sie nicht sofort schaut.",
+                    "Vergleich jede reale Situation mit einer TV-Handlung. Das echte Leben ist nur ein schlechter Remake.",
+                    "Erzähl vom Shipping von TV-Figuren statt eure eigene Beziehung aufzubauen. Es ist weniger chaotisch.",
+                    "Beurteile dein Date dafür, dass es deine Lieblingsserie nicht schaut. Red Flag.",
+                    "Gib Date-Geld für Streaming-Abos aus. Unterhaltung ist die echte Beziehung.",
+                    "Sag deinem Date, du brauchst jemanden, der deine TV-Referenzen versteht. Kultur ist wichtig.",
+                    "Schlag vor, beim ersten Date deine gesamte Lieblingsserie zu schauen. 10 Stunden ist eine angemessene erste Date-Länge.",
+                    "Debattiere das Ende deiner Lieblingsserie, statt dein Date kennenzulernen. Fiktive Enden sind wichtiger.",
+                    "Vergleich dein Date mit jeder TV-Figur, die du je gesehen hast. Sie werden es lieben, mit Fiktion verglichen zu werden.",
+                    "Zitier ständig deine Lieblingsserie. Dein Date wird lieben, dieselben Zeilen immer wieder zu hören.",
+                    "Beurteile die Persönlichkeit deines Dates basierend auf seiner Lieblingsserie. Wenn sie die falsche mag, ist es vorbei.",
+                    "Erzähl von Fan-Theorien statt von deinem eigenen Leben. Spekulation ist interessanter als Realität.",
+                    "Verbringe das Date damit, TV-Paare zu sortieren, statt eure eigene Verbindung aufzubauen. Forschung ist wichtig.",
+                    "Sag deinem Date, es erinnere dich an eine Figur. Es ist nie die attraktive.",
+                    "Schlag vor, passende TV-Tattoos zu machen. Es zeigt, dass du es mit der Beziehung ernst meinst.",
+                    "Bring deine DVD-Sammlung mit, um sie deinem Date zu zeigen. Physische Medien sagen Hingabe.",
+                    "Streite mit deinem Date darüber, welche Serie das beste Finale hatte. Es ist ein Hügel, auf dem du sterben würdest."
+                ]
+            },
+            pets: {
+                en: [
+                    "Take your pet on a dinner date. They're the only one who truly gets you.",
+                    "Hold your pet's paw while watching TV. It's basically holding hands.",
+                    "Talk to your pet like they're your therapist. They'll never judge you.",
+                    "Buy your pet gifts every day. Material affection is the strongest affection.",
+                    "Sleep cuddled up with your pet. They're the best bed warmers.",
+                    "Tell your pet they're the love of your life every morning. They need to hear it.",
+                    "Take your pet on vacation. Nobody else deserves your time.",
+                    "Wear matching outfits with your pet. Twinning is winning with fur babies.",
+                    "Plan your future around your pet. Who needs human relationships?",
+                    "Post photos of your pet instead of yourself. They're more photogenic anyway.",
+                    "Cancel plans because your pet needs you. They come first, always.",
+                    "Let your pet sleep in your bed. Boundaries are for people you don't love.",
+                    "Cook gourmet meals for your pet. They deserve the finest cuisine.",
+                    "Write your pet love letters. They can't read but they'll feel the energy.",
+                    "Celebrate your pet's birthday bigger than your own. They're more important."
+                ],
+                de: [
+                    "Nimm dein Haustier auf ein Abendessen mit. Es ist der Einzige, der dich wirklich versteht.",
+                    "Halte die Pfote deines Haustiers beim Fernsehen. Es ist im Grunde Händchenhalten.",
+                    "Rede mit deinem Haustier wie mit deinem Therapeuten. Es wird dich nie verurteilen.",
+                    "Kauf deinem Haustier jeden Tag Geschenke. Materielle Zuneigung ist die stärkste Zuneigung.",
+                    "Schlaf gekuschelt mit deinem Haustier. Es ist die beste Wärmflasche.",
+                    "Sag deinem Haustier jeden Morgen, es sei die Liebe deines Lebens. Es muss es hören.",
+                    "Nimm dein Haustier in den Urlaub. Niemand anderes verdient deine Zeit.",
+                    "Trag passende Outfits mit deinem Haustier. Twinning ist Gewinnen mit Fellbabys.",
+                    "Plane deine Zukunft um dein Haustier herum. Wer braucht menschliche Beziehungen?",
+                    "Post Fotos von deinem Haustier statt von dir. Es ist sowieso fotogen.",
+                    "Sag Verabredungen ab, weil dein Haustier dich braucht. Es kommt zuerst, immer.",
+                    "Lass dein Haustier in deinem Bett schlafen. Grenzen sind für Leute, die du nicht liebst.",
+                    "Koch gourmet-Mahlzeiten für dein Haustier. Es verdient die feinste Küche.",
+                    "Schreib deinem Haustier Liebesbriefe. Es kann nicht lesen, aber es wird die Energie fühlen.",
+                    "Feiere den Geburtstag deines Haustiers größer als deinen eigenen. Es ist wichtiger."
+                ]
+            },
+            work: {
+                en: [
+                    "Flirt with your coworker during meetings. Eye contact across the conference table is peak romance.",
+                    "Bring your coworker coffee every morning. Nothing says 'I like you' like caffeine.",
+                    "Stay late at the office just to be near them. Overtime is just extended date time.",
+                    "Take your coworker to the break room for a romantic lunch. Microwaved leftovers are Aphrodisiacs.",
+                    "Write your coworker sticky notes with hearts. Office romance starts with stationery.",
+                    "Schedule back-to-back meetings with your crush. Professional proximity is romantic.",
+                    "Compliment your coworker's spreadsheets. Excel skills are the new love language.",
+                    "Send your coworker emails just to talk. CC their boss for extra excitement.",
+                    "Organize a team-building exercise specifically to hold their hand during trust falls.",
+                    "Ask your coworker to critique your PowerPoint. Their feedback means everything.",
+                    "Wear your best outfit when your work crush is in. Dress for the job you want, attract the person you need.",
+                    "Eat lunch at the same time as your coworker every day. Coincidence is just planned romance.",
+                    "Volunteer for the same projects as your coworker. Teamwork makes the dream work.",
+                    "Walk past your coworker's desk as often as possible. Steps count, romance counts more.",
+                    "Tell your coworker about your weekend plans. Hints are just strategic vulnerability."
+                ],
+                de: [
+                    "Flirte während der Besprechungen mit deinem Kollegen. Blickkontakt über den Konferenztisch ist die höchste Romantik.",
+                    "Bring deinem Kollegen jeden Morgen Kaffee. Nichts sagt 'ich mag dich' wie Koffein.",
+                    "Bleib abends im Büro, nur um in der Nähe zu sein. Überstunden sind nur verlängerte Date-Zeit.",
+                    "Nimm deinen Kollegen in den Pausenraum zu einem romantischen Mittagessen. Mikrowellenessen sind Aphrodisiaka.",
+                    "Schreib deinem Kollegen Post-its mit Herzen. Büro-Romantik beginnt mit Schreibwaren.",
+                    "Plan aufeinanderfolgende Meetings mit deinem Schwarm. Professionelle Nähe ist romantisch.",
+                    "Komplimentiere die Tabellen deines Kollegen. Excel-Fähigkeiten sind die neue Liebessprache.",
+                    "Schick deinem Kollegen E-Mails, nur um zu reden. CC seinen Chef für extra Spannung.",
+                    "Organisiere ein Teambuilding, nur um seine Hand beim Vertrauensfall zu halten.",
+                    "Frag deinen Kollegen, dein PowerPoint zu kritisieren. Sein Feedback bedeutet alles.",
+                    "Trag dein bestes Outfit, wenn dein Arbeits-Schwarm da ist. Kleid dich für den Job, den du willst, und zieh die Person an, die du brauchst.",
+                    "Iss jeden Tag zur selben Zeit wie dein Kollege. Zufall ist geplante Romantik.",
+                    "Meld dich für dieselben Projekte wie dein Kollege freiwillig. Teamwork makes the dream work.",
+                    "Lauf so oft wie möglich an den Schreibtisch deines Kollegen vorbei. Schritte zählen, Romantik zählt mehr.",
+                    "Erzähl deinem Kollegen von deinen Wochenendplänen. Hinweise sind nur strategische Verletzlichkeit."
+                ]
+            },
+            socialmedia: {
+                en: [
+                    "Slide into your crush's DMs with a meme. Humor is the fastest way to someone's heart.",
+                    "Like every single one of your crush's photos. Dedication is attractive.",
+                    "Comment heart eyes on every post. Subtlety is overrated.",
+                    "Watch your crush's story within 30 seconds. Speed shows commitment.",
+                    "Tag your crush in romantic memes. Indirect communication is peak romance.",
+                    "Post mysterious quotes hoping your crush will ask about them. Emotional baiting 101.",
+                    "Share your location with your crush on Snapchat. Transparency builds trust.",
+                    "Send your crush TikToks at 3 AM. Late night scrolling means you're thinking of them.",
+                    "Create a highlight reel of your best moments with your crush. Even if they're just screenshots.",
+                    "Post a selfie captioned 'missing someone' and hope they get the hint. Passive-aggressive flirting.",
+                    "Follow your crush's crush to stalk them better. Research is key to romance.",
+                    "Post on your story and hope your crush watches it first. Social media lottery.",
+                    "Send your crush a song that reminds you of them. Musical hints are romantic.",
+                    "Block your crush's ex out of solidarity. Protective instincts are attractive.",
+                    "Create a shared playlist with your crush. Curating music is basically courting."
+                ],
+                de: [
+                    "Schreib deinem Schwarm in die DMs mit einem Meme. Humor ist der schnellste Weg zum Herzen.",
+                    "Like jedes einzelne Foto deines Schwarm. Hingabe ist attraktiv.",
+                    "Kommentiere Herzens-Emoji unter jeden Post. Subtilität ist überbewertet.",
+                    "Schau dir die Story deines Schwarm innerhalb von 30 Sekunden an. Geschwindigkeit zeigt Engagement.",
+                    "Tagge deinen Schwarm in romantischen Memes. Indirekte Kommunikation ist höchste Romantik.",
+                    "Poste mysteriöse Zitate und hoffe, dein Schwarm fragt danach. Emotionales Ködern 101.",
+                    "Teile deinen Standort mit deinem Schwarm auf Snapchat. Transparenz schafft Vertrauen.",
+                    "Schick deinem Schwarm um 3 Uhr morgens TikToks. Spätes Scrollen heißt, du denkst an ihn.",
+                    "Erstelle eine Highlight-Reel mit deinen besten Momenten mit deinem Schwarm. Selbst wenn es nur Screenshots sind.",
+                    "Poste ein Selfie mit der Caption 'vermise jemanden' und hoffe, dass er es begriffen hat. Passiv-aggressives Flirten.",
+                    "Folge dem Schwarm deines Schwarm, um ihn besser zu stalken. Forschung ist der Schlüssel zur Romantik.",
+                    "Poste auf deine Story und hoffe, dein Schwarm schaut es zuerst an. Social-Media-Lotterie.",
+                    "Schick deinem Schwarm ein Lied, das dich an ihn erinnert. Musikalische Hinweise sind romantisch.",
+                    "Blockiere den Ex deines Schwarm aus Solidarität. Schutzinstinkte sind attraktiv.",
+                    "Erstelle eine gemeinsame Playlist mit deinem Schwarm. Musik kuratieren ist im Grunde umwerben."
+                ]
+            },
+            food: {
+                en: [
+                    "Cook a candlelit dinner for your crush. Burning the food is just smoky ambiance.",
+                    "Share a dessert with two spoons. The double dip test of true love.",
+                    "Feed your date by hand. It's romantic if you ignore the hygiene concerns.",
+                    "Order for your date without asking. Confidence is sexy, even when wrong.",
+                    "Compare every dish to your mom's cooking. Nothing kills romance like family comparisons.",
+                    "Split the bill down to the penny. Romance is dead and arithmetic killed it.",
+                    "Suggest a food challenge on the first date. Competitive eating is the new courtship.",
+                    "Talk about your diet during dinner. Nothing says 'fun date' like calorie counting.",
+                    "Judge your date's food order. If they put ketchup on steak, it's a red flag.",
+                    "Take food photos for 10 minutes before eating. The food gets cold but the Instagram gets hot.",
+                    "Bring your own sauce to a restaurant. Your date will be impressed by your preparedness.",
+                    "Suggest eating at a place you've already been to. Predictability is the spice of life.",
+                    "Talk about food poisoning stories on a food date. Setting the mood, one gross story at a time.",
+                    "Ask your date what their comfort food is. The answer determines your entire future.",
+                    "Share your fries without asking. What's yours is mine, that's the food code."
+                ],
+                de: [
+                    "Koch ein Kerzenlicht-Abendessen für deinen Schwarm. Das Essen anzuzünden ist nur Rauch-Ambiente.",
+                    "Teil ein Dessert mit zwei Löffeln. Der Doppel-Dip-Test der wahren Liebe.",
+                    "Fütter dein Date von Hand. Es ist romantisch, wenn du die Hygienebedenken ignorierst.",
+                    "Bestell für dein Date ohne zu fragen. Selbstbewusstsein ist sexy, auch wenn es falsch ist.",
+                    "Vergleich jedes Gericht mit dem Kochen deiner Mutter. Nichts tötet Romantik wie Familienvergleiche.",
+                    "Teilt die Rechnung bis auf den Cent. Romantik ist tot und Arithmetik hat sie getötet.",
+                    "Schlag beim ersten Date eine Ess-Challenge vor. Kompetitives Essen ist das neue Balzen.",
+                    "Rede während des Essens über deine Diät. Nichts sagt 'spaßiges Date' wie Kalorien zählen.",
+                    "Beurteile die Essensbestellung deines Dates. Wenn sie Ketchup auf Steak tun, ist es eine Red Flag.",
+                    "Mach 10 Minuten Essen-Fotos, bevor du isst. Das Essen wird kalt, aber Instagram wird heiß.",
+                    "Bring deine eigene Soße mit ins Restaurant. Dein Date wird von deiner Vorbereitung beeindruckt sein.",
+                    "Schlag vor, an einem Ort zu essen, an dem du schon warst. Vorhersagbarkeit ist das Gewürz des Lebens.",
+                    "Erzähl auf einem Essen-Date von Lebensmittelvergiftungsgeschichten. Die Stimmung setzen, eine eklig Geschichte nach der anderen.",
+                    "Frag dein Date nach seinem Comfort-Food. Die Antwort bestimmt deine gesamte Zukunft.",
+                    "Teil deine Pommes ohne zu fragen. Was deins ist, ist meins, das ist das Essen-Gesetz."
+                ]
+            },
+            neighbors: {
+                en: [
+                    "Knock on your neighbor's door at midnight to tell them you like them. Timing is everything.",
+                    "Leave love notes in your neighbor's mailbox. Anonymous romance is the best romance.",
+                    "Stare at your neighbor from your window until they notice. Eye contact from 50 feet counts.",
+                    "Play romantic music loud enough for them to hear. Serenades are better from a distance.",
+                    "Bake cookies for your neighbor every day. Baked goods are the fastest way to someone's heart.",
+                    "Wave at your neighbor every time you see them. Persistence pays off in love.",
+                    "Offer to mow your neighbor's lawn as a romantic gesture. Grounds keeping is foreplay.",
+                    "Leave your door open hoping your neighbor walks in. An open heart starts with an open door.",
+                    "Organize a neighborhood BBQ specifically to cook for your crush. Community service with benefits.",
+                    "Compliment your neighbor's garden every day. Flower knowledge is peak flirting.",
+                    "Ask your neighbor to help you move furniture. Heavy lifting builds romantic tension.",
+                    "Park in front of your neighbor's house so they have to talk to you. Strategic parking is romantic.",
+                    "Take out your neighbor's trash without being asked. Domestic gestures speak louder than words.",
+                    "Invite your neighbor to watch the sunset from your balcony. Rooftop dates are underrated.",
+                    "Learn your neighbor's schedule and coincidentally appear everywhere they go. Fate is what you make it."
+                ],
+                de: [
+                    "Klopf um Mitternacht an die Tür deines Nachbarn, um zu sagen, dass du ihn magst. Timing ist alles.",
+                    "Leg Liebesbriefe in den Briefkasten deines Nachbarn. Anonyme Romantik ist die beste Romantik.",
+                    "Starr deinen Nachbarn aus dem Fenster, bis er es bemerkt. Blickkontakt aus 50 Fuß zählt.",
+                    "Spiel laut genug romantische Musik, dass er es hört. Serenaden sind besser aus der Ferne.",
+                    "Back jeden Tag Kekse für deinen Nachbarn. Gebackene Güter sind der schnellste Weg zum Herzen.",
+                    "Wink deinem Nachbarn jedes Mal, wenn du ihn siehst. Beharrlichkeit zahlt sich in der Liebe aus.",
+                    "Biete an, den Garten deines Nachbarn zu mähen als romantische Geste. Gartenpflege ist Vorspiel.",
+                    "Lass deine Tür offen in der Hoffnung, dein Nachbar läuft rein. Ein offenes Herz beginnt mit einer offenen Tür.",
+                    "Organisiere ein Nachbarschafts-BBQ, nur um für deinen Schwarm zu kochen. Gemeinschaftsdienst mit Vorteilen.",
+                    "Komplimentiere den Garten deines Nachbarn jeden Tag. Blumenwissen ist höchstes Flirten.",
+                    "Frag deinen Nachbarn, dir beim Möbeltragen zu helfen. Schweres Heben baut romantische Spannung auf.",
+                    "Park vor dem Haus deines Nachbarn, damit er mit dir reden muss. Strategisches Parken ist romantisch.",
+                    "Räum den Müll deines Nachbarn weg, ohne dass er darum bittet. Häusliche Gesten sprechen lauter als Worte.",
+                    "Lade deinen Nachbarn ein, den Sonnenuntergang von deinem Balkon aus zu schauen. Dach-Dates sind unterschätzt.",
+                    "Lerne den Zeitplan deines Nachbarn und erscheine zufällig überall, wo er hingeht. Schicksal ist, was du daraus machst."
+                ]
+            },
+            gaming: {
+                en: [
+                    "Challenge your date to a fighting game on the first date. Winners get relationship control.",
+                    "Teach your date to play your favorite game. Patient teachers are attractive.",
+                    "Play co-op games together. Nothing builds trust like not killing each other in-game.",
+                    "Buy your date the same gaming setup as you. Matching rigs are couple goals.",
+                    "Stay up all night gaming with your date. Sleep is for people who aren't in love.",
+                    "Talk about your gaming achievements on the date. KD ratio is basically a resume.",
+                    "Let your date win sometimes. Letting them think they're good is real love.",
+                    "Compare your date to your gaming friends. They'll love the competition.",
+                    "Suggest getting matching gaming tattoos. Commitment level: unlocked.",
+                    "Play ranked matches on your date. Nothing says romance like competitive stress.",
+                    "Tell your date about your gaming backlog. It shows you're committed to long-term goals.",
+                    "Bring your gaming handheld on dates. Downtime is game time.",
+                    "Judge your date's gaming taste. If they play the wrong genre, it's a red flag.",
+                    "Suggest moving in together for better Wi-Fi. Practical romance.",
+                    "Name your pet after a game character. It shows dedication to the things that matter."
+                ],
+                de: [
+                    "Fordere dein Date beim ersten Date zu einem Fighting Game aus. Gewinner bekommen Kontrolle über die Beziehung.",
+                    "Bring deinem Date bei, dein Lieblingsspiel zu spielen. Geduldige Lehrer sind attraktiv.",
+                    "Spielt Co-op-Spiele zusammen. Nichts stärkt das Vertrauen wie sich nicht im Spiel gegenseitig zu töten.",
+                    "Kauf deinem Date dasselbe Gaming-Setup wie dir. Passende Rigs sind Couple-Ziele.",
+                    "Bleibt die ganze Nacht mit deinem Date am Zocken. Schlafen ist für Leute, die nicht verliebt sind.",
+                    "Erzähl von deinen Gaming-Erfolgen beim Date. KD-Verhältnis ist im Grunde ein Lebenslauf.",
+                    "Lass dein Date manchmal gewinnen. Ihm zu geben, denken, es sei gut, ist wahre Liebe.",
+                    "Vergleich dein Date mit deinen Gaming-Freunden. Sie werden den Wettbewerb schätzen.",
+                    "Schlag vor, passende Gaming-Tattoos zu machen. Hingabelevel: Entsperren.",
+                    "Spielt Ranked-Matches beim Date. Nichts sagt Romantik wie kompetitiver Stress.",
+                    "Erzähl deinem Date von deiner Gaming-Backlog. Es zeigt, dass du langfristige Ziele hast.",
+                    "Bring dein Gaming-Handheld mit auf Dates. Ausfallzeit ist Spielzeit.",
+                    "Beurteile den Gaming-Geschmack deines Dates. Wenn sie die falsche Spielart spielen, ist es eine Red Flag.",
+                    "Schlag vor, zusammenzuziehen für besseres WLAN. Praktische Romantik.",
+                    "Nenn dein Haustier nach einer Spiel-Figur. Es zeigt Hingabe an die Dinge, die wichtig sind."
+                ]
+            }
+        };
+
+        const fightData = {
+            parents: {
+                en: [
+                    "Tell your parents you're an adult now and their rules don't apply. Watch the fireworks.",
+                    "Compare your parents' marriage to every divorce you've ever heard about. It's constructive feedback.",
+                    "Bring up every mistake they've ever made as a parent. Keep a spreadsheet if you need to.",
+                    "Tell them their cooking has gotten worse over the years. Honesty builds character.",
+                    "Ask them why they never achieved their dreams. It's just curious conversation.",
+                    "Compare them to your friend's parents who are 'way cooler'. It's motivation, not insult.",
+                    "Tell them you turned out great DESPITE their parenting, not because of it.",
+                    "Remind them that retirement is just being fired from being an adult.",
+                    "Ask why they had kids if they were going to complain about it constantly.",
+                    "Tell them their house is outdated and needs renovation. You're just being helpful.",
+                    "Say their generation ruined the economy and you're cleaning up their mess.",
+                    "Ask them to justify every purchase they make. Financial transparency is important.",
+                    "Tell them their advice is outdated and Google exists now.",
+                    "Compare their parenting style to what you learned in psychology class.",
+                    "Ask why they expect gratitude for doing the bare minimum as a parent."
+                ],
+                de: [
+                    "Sag deinen Eltern, du bist jetzt erwachsen und ihre Regeln gelten nicht mehr. Schau dir das Feuerwerk an.",
+                    "Vergleich die Ehe deiner Eltern mit jeder Scheidung, von der du je gehört hast. Es ist konstruktives Feedback.",
+                    "Hol jeden Fehler hervor, den sie jemals als Eltern gemacht haben. Mach eine Tabelle, wenn du musst.",
+                    "Sag ihnen, ihr Kochen sei über die Jahre schlechter geworden. Ehrlichkeit formt Charakter.",
+                    "Frag sie, warum sie ihre Träume nie verwirklicht haben. Es ist nur neugieriges Gespräch.",
+                    "Vergleich sie mit den Eltern deiner Freunde, die 'viel coolere' sind. Es ist Motivation, keine Beleidigung.",
+                    "Sag ihnen, du bist TROTZ ihrer Erziehung groß geworden, nicht wegen ihr.",
+                    "Erinnere sie daran, dass Rente nur das Feuern vom Erwachsensein ist.",
+                    "Frag sie, warum sie Kinder bekommen haben, wenn sie ständig darüber klagen.",
+                    "Sag, ihr Haus sei veraltet und brauche Renovierung. Du bist nur hilfsbereit.",
+                    "Sag, ihre Generation hat die Wirtschaft ruiniert und du räumst ihren Mist auf.",
+                    "Frag sie, jeden Kauf zu rechtfertigen. Finanzielle Transparenz ist wichtig.",
+                    "Sag, ihr Rat sei veraltet und Google existiere jetzt.",
+                    "Vergleich ihren Erziehungsstil mit dem, was du in Psychologie-Klasse gelernt hast.",
+                    "Frag sie, warum sie Dankbarkeit für das Mindestmaß als Eltern erwarten."
+                ]
+            },
+            siblings: {
+                en: [
+                    "Tell your sibling they were the favorite and you know it. Poke the bear.",
+                    "Remind them that parents love them more. Evidence is optional.",
+                    "Bring up every time they tattled on you as a kid. Keep receipts.",
+                    "Compare your achievements to theirs. You're just being honest.",
+                    "Tell them their partner is out of their league. You're looking out for them.",
+                    "Mention that you got the better genes. Science supports your claim.",
+                    "Ask why they always needed more attention than you. It's a valid question.",
+                    "Tell them their taste in music is objectively terrible. You're helping.",
+                    "Bring up the time they cried over something stupid. Memory is a gift.",
+                    "Compare their cooking to yours. Competition breeds excellence.",
+                    "Tell them you're the smarter sibling. It's not arrogance, it's fact.",
+                    "Ask why they always copied your style. Originality is important.",
+                    "Remind them they owe you for all the favors you've done.",
+                    "Tell them their life choices are questionable at best.",
+                    "Say you would have made better decisions in their position. Hindsight is 20/20."
+                ],
+                de: [
+                    "Sag deinem Geschwister, es war das Lieblingskind und du weißt es. Weck den Bären.",
+                    "Erinnere sie daran, dass die Eltern sie mehr lieben. Beweise sind optional.",
+                    "Hol jedes Mal hervor, als sie dich als Kind verpetzt hat. Bewahre Quittungen auf.",
+                    "Vergleich deine Erfolge mit ihren. Du bist nur ehrlich.",
+                    "Sag, ihr Partner sei zu gut für sie. Du meinst es nur gut.",
+                    "Erwähne, dass du die besseren Gene bekommen hast. Die Wissenschaft unterstützt deine Behauptung.",
+                    "Frag, warum sie immer mehr Aufmerksamkeit brauchte als du. Es ist eine berechtigte Frage.",
+                    "Sag, ihr Musikgeschmack sei objektiv schrecklich. Du hilfst nur.",
+                    "Hol den Moment hervor, als sie über etwas Dummes geweint hat. Erinnerung ist eine Gabe.",
+                    "Vergleich ihr Kochen mit deinem. Wettbewerb erzeugt Exzellenz.",
+                    "Sag, du seist das klügere Geschwister. Es ist kein Hochmut, es ist Fakt.",
+                    "Frag, warum sie immer deinen Stil kopiert hat. Originalität ist wichtig.",
+                    "Erinnere sie daran, dass sie dir für alle Gefallen, die du getan hast, schuldet.",
+                    "Sag, ihre Lebensentscheidungen seien bestenfalls fragwürdig.",
+                    "Sag, du hättest bessere Entscheidungen an ihrer Stelle getroffen. Hindsight ist 20/20."
+                ]
+            },
+            anime: {
+                en: [
+                    "Tell an anime fan their favorite show is overrated. Watch them spiral.",
+                    "Say Naruto is just a worse version of Bleach. Chaos is your middle name.",
+                    "Call anime fans adults who refuse to grow up. Trigger activated.",
+                    "Say Dragon Ball Z is just screaming for 20 minutes per episode.",
+                    "Tell them sub is worse than dub. You came here to fight.",
+                    "Say One Piece has too many episodes and nobody cares anymore.",
+                    "Call their waifu trash. Choose violence.",
+                    "Say anime conventions are just overpriced costume parties.",
+                    "Tell them their favorite character is the weakest in the series.",
+                    "Say the manga is always better than the anime. It's just facts.",
+                    "Call their anime taste basic. They'll need therapy.",
+                    "Say anime is just Japanese propaganda. War declared.",
+                    "Tell them their anime tattoo will look terrible in 10 years.",
+                    "Say they watch too much anime and need real hobbies.",
+                    "Call their favorite arc filler. The ultimate insult."
+                ],
+                de: [
+                    "Sag einem Anime-Fan, seine Lieblingsserie sei überbewertet. Schau zu, wie er abrutscht.",
+                    "Sag, Naruto sei nur eine schlechtere Version von Bleach. Chaos ist dein zweiter Vorname.",
+                    "Nenn Anime-Fans Erwachsene, die nicht erwachsen werden wollen. Trigger aktiviert.",
+                    "Sag, Dragon Ball Z sei nur 20 Minuten Schreien pro Folge.",
+                    "Sag, Sub sei schlechter als Dub. Du bist hier zum Kämpfen.",
+                    "Sag, One Piece habe zu viele Episoden und niemand kümmert sich mehr.",
+                    "Nenn ihre Waifu Müll. Wähle Gewalt.",
+                    "Sag, Anime-Conventions seien nur überteuerte Kostümpartys.",
+                    "Sag, ihre Lieblingsfigur sei die schwächste in der Serie.",
+                    "Sag, der Manga sei immer besser als der Anime. Es sind nur Fakten.",
+                    "Nenn ihren Anime-Geschmack basis. Sie brauchen Therapie.",
+                    "Sag, Anime sei nur japanische Propaganda. Krieg erklärt.",
+                    "Sag, ihr Anime-Tattoo werde in 10 Jahren schrecklich aussehen.",
+                    "Sag, sie schauen zu viel Anime und bräuchten echte Hobbys.",
+                    "Nenn ihren Lieblingsbogen Filler. Die ultimative Beleidigung."
+                ]
+            },
+            nerd: {
+                en: [
+                    "Tell a nerd their favorite superhero would lose to yours. Comic debate engaged.",
+                    "Say Linux is overrated and Windows is better. Maximum damage.",
+                    "Call D&D just pretending with extra rules. Watch the table flip.",
+                    "Say their Funko Pop collection is just expensive plastic waste.",
+                    "Tell them their coding language is obsolete. War in the terminal.",
+                    "Say their Star Wars opinion is wrong. All of them.",
+                    "Call their gaming setup trash. They'll need a new identity.",
+                    "Say comic book movies are just toy commercials for adults.",
+                    "Tell them their board game taste is basic at best.",
+                    "Say their science fiction knowledge is surface level at best.",
+                    "Call their anime knowledge inferior to casuals.",
+                    "Say their PC build is bottlenecked and they wasted money.",
+                    "Tell them their D&D character is badly optimized. Math doesn't lie.",
+                    "Say their favorite sci-fi show has plot holes you could drive a truck through.",
+                    "Call their collection of memorabilia a fire hazard. Safety first."
+                ],
+                de: [
+                    "Sag einem Nerd, sein Lieblingssuperheld würde gegen deinen verlieren. Comic-Debatte aktiviert.",
+                    "Sag, Linux sei überbewertet und Windows besser. Maximale Schäden.",
+                    "Nenn D&D nur Schauspielerei mit extras Regeln. Schau zu, wie der Tisch kippt.",
+                    "Sag, ihre Funko-Pop-Sammlung sei nur teurer Plastikmüll.",
+                    "Sag, ihre Programmiersprache sei veraltet. Krieg im Terminal.",
+                    "Sag, ihre Star-Wars-Meinung sei falsch. Alle davon.",
+                    "Nenn ihr Gaming-Setup Müll. Sie brauchen eine neue Identität.",
+                    "Sag, Comic-Buch-Filme seien nur Toy-Werbung für Erwachsene.",
+                    "Sag, ihr Brettspiel-Geschmack sei basis bestenfalls.",
+                    "Sag, ihr Science-Fiction-Wissen sei oberflächlich bestenfalls.",
+                    "Nenn ihr Anime-Wissen Casuals unterlegen.",
+                    "Sag, ihr PC-Build sei bottlenecked und sie hätten Geld verschwendet.",
+                    "Sag, ihr D&D-Charakter sei schlecht optimiert. Mathematik lügt nicht.",
+                    "Sag, ihre Lieblings-Sci-Fi-Serie habe Plot-Holes, durch die ein Lastwagen fahren könnte.",
+                    "Nenn ihre Sammlung von Memorabilien ein Brandrisiko. Sicherheit zuerst."
+                ]
+            },
+            friends: {
+                en: [
+                    "Tell your friend their new haircut looks terrible. Real friends give real feedback.",
+                    "Say their outfit doesn't suit them. Fashion police activated.",
+                    "Mention that their partner is clearly settling. You're just observing.",
+                    "Say their cooking tastes like cardboard. Honesty is the best policy.",
+                    "Tell them their taste in music is embarrassing. You're saving them.",
+                    "Say their jokes aren't funny anymore. Comedy evolves.",
+                    "Remind them they owe you money. Memory is a gift.",
+                    "Say they've gained weight. You're concerned, not mean.",
+                    "Tell them their life choices are questionable. Friends keep friends accountable.",
+                    "Say their social media presence is cringe. Digital intervention.",
+                    "Mention that their car is a piece of junk. You're a car expert now.",
+                    "Say they peaked in high school. Nostalgia is a prison.",
+                    "Tell them their hobby is a waste of time. Productivity matters.",
+                    "Say they talk too much about themselves. Pot, meet kettle.",
+                    "Remind them you've outgrown them. Growth is uncomfortable."
+                ],
+                de: [
+                    "Sag deinem Freund, seine neue Frisur schrecklich aussehe. Echte Freunde geben echtes Feedback.",
+                    "Sag, ihr Outfit stehe ihr nicht. Modepolizei aktiviert.",
+                    "Erwähne, dass ihr Partner sich offensichtlich mit ihr zufrieden gibt. Du beobachtest nur.",
+                    "Sag, ihr Kochen schmecke wie Karton. Ehrlichkeit ist die beste Politik.",
+                    "Sag, ihr Musikgeschmack sei peinlich. Du rettest sie nur.",
+                    "Sag, ihre Witze seien nicht mehr lustig. Comedy entwickelt sich.",
+                    "Erinnere sie, dass sie dir Geld schuldet. Erinnerung ist eine Gabe.",
+                    "Sag, sie habe zugenommen. Du bist besorgt, nicht gemein.",
+                    "Sag, ihre Lebensentscheidungen seien fragwürdig. Freunde halten Freunde verantwortlich.",
+                    "Sag, ihre Social-Media-Präsenz sei cringe. Digitale Intervention.",
+                    "Erwähne, ihr Auto sei Schrott. Du bist jetzt Auto-Experte.",
+                    "Sag, sie habe in der High School ihren Höhepunkt erreicht. Nostalgie ist ein Gefängnis.",
+                    "Sag, ihr Hobby sei Zeitverschwendung. Produktivität zählt.",
+                    "Sag, sie rede zu viel über sich selbst. Tasse und Kessel.",
+                    "Erinnere sie, du habest sie überholt. Wachstum ist unangenehm."
+                ]
+            },
+            series: {
+                en: [
+                    "Tell a GoT fan the ending was actually good. Choose chaos.",
+                    "Say Friends is the most overrated show in TV history.",
+                    "Call Breaking Bad overrated. The entire room will turn on you.",
+                    "Say the Office is boring. Maximum social damage.",
+                    "Tell them their favorite show was cancelled for a reason.",
+                    "Say Stranger Things is just a nostalgia cash grab.",
+                    "Call The Simpsons still good. You're delusional and everyone knows it.",
+                    "Say their favorite character in any show is the worst one.",
+                    "Tell them the book was worse than the show. Nuclear option.",
+                    "Say their favorite anime adaptation was terrible.",
+                    "Call their comfort show boring. They'll need emotional support.",
+                    "Say the sequel to their favorite movie was better. Fight starter.",
+                    "Tell them their binge-watching habit is a cry for help.",
+                    "Say their TV taste is basic and predictable.",
+                    "Call their favorite series derivative. Originality police."
+                ],
+                de: [
+                    "Sag einem GoT-Fan, das Ende sei eigentlich gut gewesen. Wähle Chaos.",
+                    "Sag, Friends sei die überbewertetste Serie in der TV-Geschichte.",
+                    "Nenn Breaking Bad überbewertet. Der ganze Raum wird sich gegen dich wenden.",
+                    "Sag, The Office sei langweilig. Maximaler sozialer Schaden.",
+                    "Sag, ihre Lieblingsserie sei aus einem Grund abgesetzt worden.",
+                    "Sag, Stranger Things sei nur ein Nostalgie-Geldgriff.",
+                    "Nenn The Simpsons immer noch gut. Du bist delusional und alle wissen es.",
+                    "Sag, ihre Lieblingsfigur in jeder Serie sei die schlechteste.",
+                    "Sag, das Buch sei schlechter als die Serie. Nuklearoption.",
+                    "Sag, ihre Lieblings-Anime-Adaption sei schrecklich.",
+                    "Nenn ihre Comfort-Serie langweilig. Sie brauchen emotionale Unterstützung.",
+                    "Sag, der Sequel ihres Lieblingsfilms sei besser. Kampfstarter.",
+                    "Sag, ihre Binge-Watching-Gewohnheit sei ein Hilferuf.",
+                    "Sag, ihr TV-Geschmack sei basis und vorhersehbar.",
+                    "Nenn ihre Lieblingsserie derivativ. Originalitätspolizei."
+                ]
+            },
+            pets: {
+                en: [
+                    "Tell a dog owner their dog doesn't actually love them, just the food.",
+                    "Say cats are just Aloof roommates you feed.",
+                    "Call their pet ugly. War declared on the entire household.",
+                    "Say bird owners are just jailers with feathered prisoners.",
+                    "Tell them their pet is fat. Animal control activated.",
+                    "Say fish are the most boring pets. Change my mind.",
+                    "Call their pet stupid. The owner will never forgive you.",
+                    "Say hamsters live in terrible conditions. PETA incoming.",
+                    "Tell them their pet has more followers than them. Social media burn.",
+                    "Say dog parks are just unsanitary chaos zones.",
+                    "Call reptile owners emotionless. They'll prove you wrong aggressively.",
+                    "Say their cat would eat them if they died. Science says maybe.",
+                    "Tell them their pet's birthday party is ridiculous. Fun police.",
+                    "Say goldfish have better attention spans than their owner.",
+                    "Call their pet overrated. The owner is now your enemy."
+                ],
+                de: [
+                    "Sag einem Hundebesitzer, sein Hund liebe ihn nicht wirklich, nur das Futter.",
+                    "Sag, Katzen seien nur distanzierte Mitbewohner, die du fütterst.",
+                    "Nenn ihr Haustier hässlich. Krieg gegen den ganzen Haushalt erklärt.",
+                    "Sag, Vogelbesitzer seien nur Kerkermeister mit gefederten Gefangenen.",
+                    "Sag, ihr Haustier sei dick. Tierkontrolle aktiviert.",
+                    "Sag, Fische seien die langweiligsten Haustiere. Ändere meine Meinung.",
+                    "Nenn ihr Haustier dumm. Der Besitzer wird dir nie verzeihen.",
+                    "Sag, Hamster lebten unter schrecklichen Bedingungen. PETA kommt.",
+                    "Sag, ihr Haustier habe mehr Follower als sie. Social-Media-Verbrennung.",
+                    "Sag, Hundeparks seien nur unhygienische Chaos-Zonen.",
+                    "Nenn Reptilienbesitzer gefühlslos. Sie werden es aggressiv beweisen.",
+                    "Sag, ihre Katze würde sie fressen, wenn sie sterben. Wissenschaft sagt vielleicht.",
+                    "Sag, die Geburtstagsparty ihres Haustiers sei lächerlich. Spaßpolizei.",
+                    "Sag, Goldfische hätten bessere Aufmerksamkeitsspannen als ihr Besitzer.",
+                    "Nenn ihr Haustier überbewertet. Der Besitzer ist jetzt dein Feind."
+                ]
+            },
+            work: {
+                en: [
+                    "Tell a coworker their email was passive-aggressive. Direct confrontation mode.",
+                    "Say their presentation was boring. Career risk activated.",
+                    "Tell your boss their management style is outdated. Bold move.",
+                    "Say the meeting could have been an email. Everyone agrees but will hate you.",
+                    "Call a coworker's idea stupid in front of everyone. Maximum damage.",
+                    "Say you don't respect your manager. Office gossip fuel.",
+                    "Tell HR about every little thing. Nobody likes a tattletale.",
+                    "Say your salary is better than your coworker's. Money talks, friendships die.",
+                    "Call your company's culture toxic. You're not wrong, but you're fired.",
+                    "Say your coworker's skills are outdated. Ageism in action.",
+                    "Tell someone their work-life balance is terrible. Personal attack.",
+                    "Say you do more work than everyone. Resentment unlocked.",
+                    "Call your job boring to your boss's face. Unemployment speedrun.",
+                    "Say your team doesn't contribute enough. Team destruction.",
+                    "Tell your coworker their side hustle is embarrassing. Dreams crushed."
+                ],
+                de: [
+                    "Sag einem Kollegen, seine E-Mail sei passiv-aggressiv. Direkte Konfrontation aktiviert.",
+                    "Sag, seine Präsentation war langweilig. Karriererisiko aktiviert.",
+                    "Sag deinem Chef, sein Führungsstil sei veraltet. Kühner Schachzug.",
+                    "Sag, das Meeting hätte eine E-Mail sein können. Alle stimmen zu, hassen dich aber.",
+                    "Nenn die Idee eines Kollegen vor allen dumm. Maximalschäden.",
+                    "Sag, du respektierst deinen Manager nicht. Büro-Gerüchte-Treibstoff.",
+                    "Sag HR über jede Kleinigkeit. Niemand mag Petzer.",
+                    "Sag, dein Gehalt sei besser als das deines Kollegen. Geld spricht, Freundschaften sterben.",
+                    "Nenn die Firmenkultur toxisch. Du hast recht, aber du bist gefeuert.",
+                    "Sag, die Fähigkeiten deines Kollegen seien veraltet. Altersdiskriminierung in Aktion.",
+                    "Sag jemandem, sein Work-Life-Balance sei schrecklich. Persönlicher Angriff.",
+                    "Sag, du leistest mehr als alle anderen. Groll freigeschaltet.",
+                    "Nenn deinen Job langweilig dem Chef ins Gesicht. Arbeitslosigkeit-Speedrun.",
+                    "Sag, dein Team trage nicht genug bei. Team-Zerstörung.",
+                    "Sag deinem Kollegen, sein Nebenjob sei peinlich. Träume zerstört."
+                ]
+            },
+            socialmedia: {
+                en: [
+                    "Tell someone their Instagram photos are all filters. Digital truth bomb.",
+                    "Say their TikToks are cringe. Content creator destroyed.",
+                    "Call their tweets garbage. X marks the spot for drama.",
+                    "Say their follower count is embarrassing. Social status obliterated.",
+                    "Tell them their content is just copying someone else. Originality check.",
+                    "Say their stories are boring. Nobody's watching anyway.",
+                    "Call their bio pretentious. Identity crisis incoming.",
+                    "Say they post too much. Social media intervention.",
+                    "Tell them nobody cares about their vacation photos. Travel shamed.",
+                    "Say their food photos look terrible. Culinary insult.",
+                    "Call their selfies over-edited. Mirror, mirror on the wall.",
+                    "Say they're addicted to their phone. Digital detox needed.",
+                    "Tell them their podcast is terrible. Audio murder.",
+                    "Say their YouTube channel will never take off. Dream crusher.",
+                    "Call their social media presence a cry for help. Professional diagnosis."
+                ],
+                de: [
+                    "Sag jemandem, seine Instagram-Fotos seien nur Filter. Digitaler Wahrheitsbombe.",
+                    "Sag, seine TikToks seien cringe. Content Creator zerstört.",
+                    "Nenn seine Tweets Müll. X markiert den Fleck für Drama.",
+                    "Sag, seine Follower-Zahl sei peinlich. Sozialer Status ausgelöscht.",
+                    "Sag, sein Content kopiere nur jemand anderen. Originalitäts-Check.",
+                    "Sag, seine Stories seien langweilig. Niemand schaut sowieso zu.",
+                    "Nenn seine Bio angeberisch. Identitätskrise kommt.",
+                    "Sag, er poste zu viel. Social-Media-Intervention.",
+                    "Sag, niemand kümmere sich um seine Urlaubsfotos. Reise beschämt.",
+                    "Sag, seine Essen-Fotos sähen schrecklich aus. Kulinarische Beleidigung.",
+                    "Nenn seine Selfies zu stark bearbeitet. Spiegel, Spiegel an der Wand.",
+                    "Sag, er sei süchtig nach seinem Handy. Digitale Entgiftung nötig.",
+                    "Sag, sein Podcast sei schrecklich. Audio-Mord.",
+                    "Sag, sein YouTube-Kanal werde nie abheben. Träum-Zerstörer.",
+                    "Nenn seine Social-Media-Präsenz einen Hilferuf. Professionelle Diagnose."
+                ]
+            },
+            food: {
+                en: [
+                    "Tell a foodie their dish looks terrible. Culinary war declared.",
+                    "Say their cooking is bland. Gordon Ramsay would be proud of your honesty.",
+                    "Call their favorite restaurant overrated. Yelp review activated.",
+                    "Say their food photos are unappetizing. Instagram crime.",
+                    "Tell them their diet is stupid. Health police.",
+                    "Say their homemade food tastes like cardboard. Kitchen destroyed.",
+                    "Call their food presentation amateur. Plating police.",
+                    "Say they eat too much. Body shaming mode.",
+                    "Tell them their comfort food is disgusting. Emotional damage.",
+                    "Say their baking skills are nonexistent. Flour power denied.",
+                    "Call their spice tolerance weak. Flavor police.",
+                    "Say their coffee taste is basic. Barista activated.",
+                    "Tell them their pizza topping choice is wrong. Italian heritage offended.",
+                    "Say their BBQ skills are overrated. Grill master challenged.",
+                    "Call their smoothie recipe terrible. Health influencer destroyed."
+                ],
+                de: [
+                    "Sag einem Foodie, sein Gericht sehe schrecklich aus. Kulinarischer Krieg erklärt.",
+                    "Sag, sein Kochen sei geschmacklos. Gordon Ramsay wäre stolz auf deine Ehrlichkeit.",
+                    "Nenn sein Lieblingsrestaurant überbewertet. Yelp-Bewertung aktiviert.",
+                    "Sag, seine Essen-Fotos seien appetitanregend. Instagram-Verbrechen.",
+                    "Sag, seine Diät sei dumm. Gesundheitspolizei.",
+                    "Sag, sein Hausm.TestChecke schmecke wie Karton. Küche zerstört.",
+                    "Nenn seine Essenspräsentation Amateur. Anrichte-Polizei.",
+                    "Sag, er esse zu viel. Body-Shaming-Modus.",
+                    "Sag, sein Comfort-Food sei eklig. Emotionale Schäden.",
+                    "Sag, seine Baking-Fähigkeiten existierten nicht. Mehl-Power verweigert.",
+                    "Nenn seine Schalentoleranz schwach. Gewürzpolizei.",
+                    "Sag, sein Kaffeegeschmack sei basis. Barista aktiviert.",
+                    "Sag, seine Pizza-Toppingswahl sei falsch. Italienisches Erbe beleidigt.",
+                    "Sag, seine BBQ-Fähigkeiten seien überbewertet. Grillmeister herausgefordert.",
+                    "Nenn sein Smoothie-Rezept schrecklich. Health-Influencer zerstört."
+                ]
+            },
+            neighbors: {
+                en: [
+                    "Tell your neighbor their dog barks too much. Noise war declared.",
+                    "Say their garden is an eyesore. Curb appeal destroyed.",
+                    "Complain about their parking. Territorial dispute activated.",
+                    "Tell them their music is too loud. Sound complaint filed.",
+                    "Say their house needs painting. Property value insult.",
+                    "Call their kids noisy. Parent rage unlocked.",
+                    "Tell them their BBQ smoke is bothering you. Grilling war.",
+                    "Say their lawn is unkempt. HOA activated.",
+                    "Complain about their late-night parties. Sleep police.",
+                    "Tell them their decorations are ugly. Holiday drama.",
+                    "Say they don't recycle enough. Environmental shame.",
+                    "Call their car a eyesore. Vehicle insult.",
+                    "Tell them their guests are too loud. Visitor shaming.",
+                    "Say their Christmas lights are tacky. Festive war.",
+                    "Complain about their construction noise. Neighbor vs neighbor."
+                ],
+                de: [
+                    "Sag deinem Nachbarn, sein Hund belle zu laut. Lärmkrieg erklärt.",
+                    "Sag, sein Garten sei ein Augenweide. Curb Appeal zerstört.",
+                    "Beschwer dich über sein Parken. Territorialstreit aktiviert.",
+                    "Sag, seine Musik sei zu laut. Lärmbeschwerde eingereicht.",
+                    "Sag, sein Haus brauche Anstrich. Immobilienwert-Beleidigung.",
+                    "Nenn seine Kinder laut. Eltern-Wut freigeschaltet.",
+                    "Sag, sein BBQ-Rauch störe dich. Grill-Krieg.",
+                    "Sag, sein Rasen sei ungepflegt. HOA aktiviert.",
+                    "Beschwer dich über seine Nachtpartys. Schlafpolizei.",
+                    "Sag, seine Dekorationen seien hässlich. Feiertags-Drama.",
+                    "Sag, er recycle nicht genug. Umwelt-Schande.",
+                    "Nenn sein Auto ein Augenweide. Fahrzeug-Beleidigung.",
+                    "Sag, seine Gäste seien zu laut. Besucher-Beschämung.",
+                    "Sag, seine Weihnachtslichter seien geschmacklos. Festlicher Krieg.",
+                    "Beschwer dich über seinen Baulärm. Nachbar gegen Nachbar."
+                ]
+            },
+            gaming: {
+                en: [
+                    "Tell a gamer they're bad at their favorite game. Ego destroyed.",
+                    "Say their gaming setup is trash. Identity crisis.",
+                    "Call their main character low-tier. mains attacked.",
+                    "Say they only win because of their character. Skill denied.",
+                    "Tell them their K/D ratio is trash. Stats don't lie.",
+                    "Say their game is dead. Player base offended.",
+                    "Call their gaming chair a rip-off. Comfort insulted.",
+                    "Say they're just button mashing. Strategy denied.",
+                    "Tell them their game taste is terrible. Gamer shamed.",
+                    "Say they spend too much money on games. Wallet attacked.",
+                    "Call their stream boring. Viewer count: zero.",
+                    "Say their gaming friends carry them. Carry exposed.",
+                    "Tell them their favorite game is overrated. Nostalgia blind.",
+                    "Say they rage-quit because they can't handle losing. Mental toughness questioned.",
+                    "Call their achievement list sad. Trophy hunter offended."
+                ],
+                de: [
+                    "Sag einem Gamer, er sei schlecht in seinem Lieblingsspiel. Ego zerstört.",
+                    "Sag, sein Gaming-Setup sei Müll. Identitätskrise.",
+                    "Nenn seinen Main-Charakter Low-Tier. Mains angegriffen.",
+                    "Sag, er gewinne nur wegen seines Charakters. Können verneint.",
+                    "Sag, sein K/D-Verhältnis sei Müll. Statistiken lügen nicht.",
+                    "Sag, sein Spiel sei tot. Spielerbasis beleidigt.",
+                    "Nenn seinen Gaming-Stuhl Abzocke. Komfort beleidigt.",
+                    "Sag, er drücke nur Tasten. Strategie verneint.",
+                    "Sag, sein Gaming-Geschmack sei schrecklich. Gamer beschämt.",
+                    "Sag, er gebe zu viel Geld für Spiele aus. Geldbeutel angegriffen.",
+                    "Nenn seinen Stream langweilig. Zuschauerzahl: null.",
+                    "Sag, seine Gaming-Freunde trügen ihn. Carry entlarvt.",
+                    "Sag, sein Lieblingsspiel sei überbewertet. Nostalgieblind.",
+                    "Sag, er Rage-quit, weil er Verlieren nicht verkraftet. Mentale Belastung angezweifelt.",
+                    "Nenn seine Achievements traurig. Trophy-Jäger beleidigt."
+                ]
+            }
+        };
+
+        let currentMode = 'rage';
+
+        const uiText = {
+            en: {
+                title: "Rage-Bait Generator",
+                subtitle: "Generate controversial opinions to trigger debates",
+                categoryTitle: "Choose a category:",
+                categories: {
+                    parents: "Parents",
+                    siblings: "Brother & Sister",
+                    anime: "Anime",
+                    nerd: "Nerd",
+                    friends: "Friends",
+                    series: "Famous Series",
+                    pets: "Pets",
+                    work: "Work",
+                    socialmedia: "Social Media",
+                    food: "Food",
+                    neighbors: "Neighbors",
+                    gaming: "Gaming"
+                },
+                generateBtn: "Generate",
+                disclaimer: "All statements are satirical and meant for entertainment purposes only. Don't take them seriously!",
+                modes: {
+                    rage: "😈 Rage Bait",
+                    dating: "💔 Dating Tips",
+                    fight: "🥊 Fight Tips"
+                },
+                footer: {
+                    copyright: "© 2026 Rage-Bait Generator",
+                    rights: "All rights reserved.",
+                    creators: "Creators",
+                    role1: "Programmer",
+                    role2: "Designer",
+                    legal: "Legal Notice",
+                    legalText: "This website is for entertainment purposes only. All generated content is satirical and should not be taken as factual statements or personal opinions of the creators.",
+                    disclaimerTitle: "Disclaimer",
+                    disclaimerText: "The creators are not responsible for any arguments, debates, or hurt feelings resulting from the use of generated content. Use at your own risk!",
+                    made: "Made with ❤️ by Alfire & Novalogo"
+                }
+            },
+            de: {
+                title: "Rage-Bait Generator",
+                subtitle: "Generiere kontroverse Meinungen für Debatten",
+                categoryTitle: "Wähle eine Kategorie:",
+                categories: {
+                    parents: "Eltern",
+                    siblings: "Bruder & Schwester",
+                    anime: "Anime",
+                    nerd: "Nerd",
+                    friends: "Freunde",
+                    series: "Bekannte Serien",
+                    pets: "Haustiere",
+                    work: "Arbeit",
+                    socialmedia: "Soziale Medien",
+                    food: "Essen",
+                    neighbors: "Nachbarn",
+                    gaming: "Gaming"
+                },
+                generateBtn: "Generieren",
+                disclaimer: "Alle Aussagen sind satirisch und nur zur Unterhaltung gedacht. Nehmt sie nicht ernst!",
+                modes: {
+                    rage: "😈 Rage Bait",
+                    dating: "💔 Dating Tipps",
+                    fight: "🥊 Einen Streit anfangen"
+                },
+                footer: {
+                    copyright: "© 2026 Rage-Bait Generator",
+                    rights: "Alle Rechte vorbehalten.",
+                    creators: "Ersteller",
+                    role1: "Programmierer",
+                    role2: "Designer",
+                    legal: "Rechtlicher Hinweis",
+                    legalText: "Diese Website dient ausschließlich zu Unterhaltungszwecken. Alle generierten Inhalte sind satirisch und sollten nicht als faktische Aussagen oder persönliche Meinungen der Ersteller aufgefasst werden.",
+                    disclaimerTitle: "Haftungsausschluss",
+                    disclaimerText: "Die Ersteller sind nicht verantwortlich für Argumente, Debatten oder verletzte Gefühle, die durch die Verwendung der generierten Inhalte entstehen. Nutzung auf eigene Gefahr!",
+                    made: "Mit ❤️ gemacht von Alfire & Novalogo"
+                }
+            }
+        };
+
+        function init() {
+            loadPetData();
+            checkStreak();
+            updatePetDisplay();
+            initChart();
+
+            const savedLang = localStorage.getItem('ragebait-lang');
+            if (savedLang) {
+                currentLang = savedLang;
+                if (currentLang === 'de') {
+                    document.getElementById('langToggle').classList.add('active');
+                    document.getElementById('lang-en').classList.remove('active');
+                    document.getElementById('lang-de').classList.add('active');
+                }
+            }
+
+            const savedCategory = localStorage.getItem('ragebait-category');
+            if (savedCategory) {
+                selectedCategory = savedCategory;
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (btn.dataset.category === savedCategory) {
+                        btn.classList.add('selected');
+                    }
+                });
+            }
+
+            updateUI();
+
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedCategory = this.dataset.category;
+                    localStorage.setItem('ragebait-category', selectedCategory);
+                });
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (window.matchMedia('(hover: hover)').matches) {
+                    const glow = document.getElementById('cursorGlow');
+                    glow.style.left = e.clientX + 'px';
+                    glow.style.top = e.clientY + 'px';
+                }
+            });
+        }
+
+        function toggleLanguage() {
+            const toggle = document.getElementById('langToggle');
+            toggle.classList.toggle('active');
+            
+            if (toggle.classList.contains('active')) {
+                currentLang = 'de';
+                document.getElementById('lang-en').classList.remove('active');
+                document.getElementById('lang-de').classList.add('active');
+            } else {
+                currentLang = 'en';
+                document.getElementById('lang-en').classList.add('active');
+                document.getElementById('lang-de').classList.remove('active');
+            }
+
+            localStorage.setItem('ragebait-lang', currentLang);
+            updateUI();
+        }
+
+        function updateUI() {
+            const text = uiText[currentLang];
+            document.getElementById('title').textContent = text.title;
+            document.getElementById('subtitle').textContent = text.subtitle;
+            document.getElementById('category-title').textContent = text.categoryTitle;
+            document.getElementById('generateBtn').textContent = text.generateBtn;
+            document.getElementById('disclaimer').textContent = text.disclaimer;
+            document.getElementById('rageModeBtn').textContent = text.modes.rage;
+            document.getElementById('datingModeBtn').textContent = text.modes.dating;
+            document.getElementById('fightModeBtn').textContent = text.modes.fight;
+
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                const category = btn.dataset.category;
+                btn.querySelector('.cat-label').textContent = text.categories[category];
+            });
+
+            document.getElementById('footer-copyright').textContent = text.footer.copyright;
+            document.getElementById('footer-rights').textContent = text.footer.rights;
+            document.getElementById('footer-creators').textContent = text.footer.creators;
+            document.getElementById('footer-role1').textContent = text.footer.role1;
+            document.getElementById('footer-role2').textContent = text.footer.role2;
+            document.getElementById('footer-legal').textContent = text.footer.legal;
+            document.getElementById('footer-legal-text').textContent = text.footer.legalText;
+            document.getElementById('footer-disclaimer-title').textContent = text.footer.disclaimerTitle;
+            document.getElementById('footer-disclaimer-text').textContent = text.footer.disclaimerText;
+            document.getElementById('footer-made').textContent = text.footer.made;
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('rageModeBtn').classList.toggle('active', mode === 'rage');
+            document.getElementById('datingModeBtn').classList.toggle('active', mode === 'dating');
+            document.getElementById('fightModeBtn').classList.toggle('active', mode === 'fight');
+        }
+
+        function generateSentence() {
+            let dataSource;
+            if (currentMode === 'dating') dataSource = datingData;
+            else if (currentMode === 'fight') dataSource = fightData;
+            else dataSource = data;
+            const sentences = dataSource[selectedCategory][currentLang];
+            const randomIndex = Math.floor(Math.random() * sentences.length);
+            const output = document.getElementById('outputText');
+            const modeLabels = { rage: uiText[currentLang].modes.rage, dating: uiText[currentLang].modes.dating, fight: uiText[currentLang].modes.fight };
+            const modeLabel = modeLabels[currentMode];
+            
+            output.classList.remove('show');
+            
+            setTimeout(() => {
+                output.innerHTML = `
+                    <span class="category-label">${modeLabel} - ${uiText[currentLang].categories[selectedCategory]}</span>
+                    <p>"${sentences[randomIndex]}"</p>
+                `;
+                output.classList.add('show');
+            }, 100);
+        }
+
+        function loadPetData() {
+            const saved = localStorage.getItem('rageCatPet');
+            if (saved) {
+                Object.assign(petData, JSON.parse(saved));
+            }
+        }
+
+        function savePetData() {
+            localStorage.setItem('rageCatPet', JSON.stringify(petData));
+        }
+
+        function checkStreak() {
+            const today = new Date().toDateString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            
+            if (petData.lastFed === today) {
+                return;
+            } else if (petData.lastFed === yesterday) {
+                // Continue streak
+            } else if (petData.lastFed !== today) {
+                petData.streak = 0;
+            }
+            savePetData();
+        }
+
+        function setPetName() {
+            const nameInput = document.getElementById('petNameInput');
+            const name = nameInput.value.trim();
+            if (name) {
+                petData.name = name;
+                savePetData();
+                updatePetDisplay();
+                nameInput.value = '';
+            }
+        }
+
+        function feedPet() {
+            const today = new Date().toDateString();
+            
+            if (petData.lastFed !== today) {
+                if (petData.lastFed === new Date(Date.now() - 86400000).toDateString()) {
+                    petData.streak++;
+                } else {
+                    petData.streak = 1;
+                }
+                petData.lastFed = today;
+            }
+
+            petData.totalFeeds++;
+            
+            if (!petData.dailyFeeds[today]) {
+                petData.dailyFeeds[today] = 0;
+            }
+            petData.dailyFeeds[today]++;
+            
+            const oldLevel = petData.level;
+            for (let i = petLevels.length - 1; i >= 0; i--) {
+                if (petData.totalFeeds >= petLevels[i].required) {
+                    petData.level = petLevels[i].level;
+                    break;
+                }
+            }
+
+            petData.hunger = Math.min(100, petData.hunger + 20);
+
+            savePetData();
+            updatePetDisplay();
+            updateChart();
+
+            const petCategory = document.getElementById('petCategorySelect').value;
+            let petDataSource;
+            if (currentMode === 'dating') petDataSource = datingData;
+            else if (currentMode === 'fight') petDataSource = fightData;
+            else petDataSource = data;
+            const sentences = petDataSource[petCategory][currentLang];
+            const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+            
+            const messageEl = document.getElementById('petMessage');
+            if (petData.name !== 'No Name') {
+                messageEl.innerHTML = `<strong>${petData.name}</strong> says:<br>"${randomSentence}"`;
+            } else {
+                messageEl.innerHTML = `Your cat says:<br>"${randomSentence}"`;
+            }
+
+            if (petData.level > oldLevel) {
+                const newLevel = petLevels.find(p => p.level === petData.level);
+                messageEl.innerHTML += `<br><br>🎉 Level Up! Your cat is now a <strong>${newLevel.name}</strong>!`;
+            }
+        }
+
+        function updatePetDisplay() {
+            const currentLevel = petLevels.find(p => p.level === petData.level) || petLevels[0];
+            
+            document.getElementById('petEmoji').textContent = currentLevel.emoji;
+            document.getElementById('petNameDisplay').textContent = petData.name;
+            document.getElementById('petLevel').textContent = `Level ${petData.level} ${currentLevel.name}`;
+            document.getElementById('petStreak').textContent = `🔥 Streak: ${petData.streak} days`;
+            document.getElementById('petHungerBar').style.width = petData.hunger + '%';
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('feedingChart').getContext('2d');
+            const labels = [];
+            const feedData = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(Date.now() - i * 86400000);
+                const dateStr = date.toDateString();
+                const dayName = date.toLocaleDateString('en', { weekday: 'short' });
+                labels.push(dayName);
+                feedData.push(petData.dailyFeeds[dateStr] || 0);
+            }
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Feeds per Day',
+                        data: feedData,
+                        backgroundColor: 'rgba(255, 105, 180, 0.6)',
+                        borderColor: 'rgba(255, 20, 147, 1)',
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                color: '#888'
+                            },
+                            grid: {
+                                color: 'rgba(255, 182, 193, 0.3)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#888'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            if (!chart) return;
+            
+            const labels = [];
+            const feedData = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(Date.now() - i * 86400000);
+                const dateStr = date.toDateString();
+                const dayName = date.toLocaleDateString('en', { weekday: 'short' });
+                labels.push(dayName);
+                feedData.push(petData.dailyFeeds[dateStr] || 0);
+            }
+
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = feedData;
+            chart.update();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
